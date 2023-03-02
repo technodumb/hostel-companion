@@ -6,34 +6,41 @@ import 'package:hostel_companion/controllers/provider/food_data.dart';
 class RangeController extends ChangeNotifier {
   OnlyDate _start = OnlyDate.noneDate();
   OnlyDate _end = OnlyDate.noneDate();
+  OnlyDate _current = OnlyDate.noneDate();
   int noOfDays = 0;
   bool _drawerExpanded = false;
 
   OnlyDate get start => _start;
   OnlyDate get end => _end;
-
+  OnlyDate get current => _current;
   bool get drawerExpand => _drawerExpanded;
 
   void setStart(DateTime newDate) {
-    _start = OnlyDate(newDate.year, newDate.month, newDate.day);
+    _start = OnlyDate.fromDate(newDate);
     notifyListeners();
   }
 
   void setEnd(DateTime newDate) {
-    _end = OnlyDate(newDate.year, newDate.month, newDate.day);
+    _end = OnlyDate.fromDate(newDate);
     noOfDays = _end.difference(_start).inDays + 1;
+    notifyListeners();
+  }
+
+  void setCurrent(DateTime newDate) {
+    _current = OnlyDate.fromDate(newDate);
     notifyListeners();
   }
 
   void reset() {
     _start = OnlyDate.noneDate();
     _end = OnlyDate.noneDate();
+    _current = OnlyDate.noneDate();
     noOfDays = 0;
     notifyListeners();
   }
 
-  void toggleDrawer() {
-    _drawerExpanded = !_drawerExpanded;
+  void toggleDrawer({bool? value}) {
+    _drawerExpanded = value ?? !_drawerExpanded;
     notifyListeners();
   }
 }

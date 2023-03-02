@@ -5,13 +5,12 @@ import 'package:hostel_companion/controllers/provider/food_data.dart';
 import 'package:hostel_companion/controllers/provider/range_controller.dart';
 import 'package:hostel_companion/controllers/provider/toggle_controller.dart';
 import 'package:hostel_companion/model/user_model.dart';
-import 'package:hostel_companion/screens/HomeScreen/components/tab_switcher.dart';
+import 'package:hostel_companion/screens/HomeScreen/components/food_choice.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
-
-import 'food_choice.dart';
 import 'range_tab_content.dart';
+import 'tab_switcher.dart';
 
 class TabContent extends StatelessWidget {
   final bool isDaily;

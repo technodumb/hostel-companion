@@ -52,7 +52,12 @@ class RangeTabContent extends StatelessWidget {
                     visible: rangeController.drawerExpand,
                     maintainSize: false,
                     child: Container(
-                      decoration: BoxDecoration(),
+                      decoration: BoxDecoration(
+                          color: Color(0x20B5B5B5),
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(20),
+                            bottomRight: Radius.circular(20),
+                          )),
                       height: width * 0.8,
                       width: double.infinity,
                       child: CustomRangeCalendar(),
@@ -73,10 +78,11 @@ class RangeTabContent extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Container(
-                  height: 40,
+                  height: 50,
+                  width: width * 0.5,
                   // padding: const EdgeInsets.symmetric(horizontal: 20),
-                  // alignment: Alignment.center,
-                  margin: EdgeInsets.symmetric(horizontal: 50),
+
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -84,6 +90,7 @@ class RangeTabContent extends StatelessWidget {
                         Color(0x7FBD00FF),
                       ],
                     ),
+                    borderRadius: BorderRadius.circular(25),
                   ),
                   child: Text('Submit',
                       style: TextStyle(
@@ -98,10 +105,27 @@ class RangeTabContent extends StatelessWidget {
             ),
             MinTextButton(
               onPressed: () {
+                rangeController.toggleDrawer(value: true);
                 rangeController.reset();
               },
               child: Container(
-                child: Text('Cancel'),
+                height: 40,
+                width: width * 0.45,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [
+                    Color(0xFFFF0000),
+                    Color(0x7FFF0000),
+                  ]),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                  ),
+                ),
               ),
             ),
             SizedBox(
@@ -180,7 +204,7 @@ class CalendarDrawer extends StatelessWidget {
             //       child: Expanded(
             //         child: TableCalendar(
             //           firstDay: tomorrow,
-            //           focusedDay: tomorrow,-
+            //           focusedDay: tomorrow,
             //           lastDay: OnlyDate(
             //               tomorrow.year, tomorrow.month + 4, tomorrow.day),
             //           shouldFillViewport: true,
@@ -220,12 +244,14 @@ class CustomRangeCalendar extends StatelessWidget {
           : rangeController.start,
       lastDay: OnlyDate(tomorrow.year, tomorrow.month + 4, tomorrow.day),
       shouldFillViewport: true,
-      currentDay: OnlyDate.noneDate(),
+      currentDay: rangeController.current,
       rangeStartDay: rangeController.start,
       rangeEndDay: rangeController.end,
       onDaySelected: (selectedDay, focusedDay) {
-        if (rangeController.start == OnlyDate.noneDate()) {
-          rangeController.setStart(selectedDay);
+        if (rangeController.current == OnlyDate.noneDate() &&
+            rangeController.start == OnlyDate.noneDate()) {
+          // rangeController.setStart(selectedDay);
+          rangeController.setCurrent(selectedDay);
         } else if (rangeController.end == OnlyDate.noneDate()) {
           if (selectedDay.isBefore(rangeController.start)) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -234,11 +260,14 @@ class CustomRangeCalendar extends StatelessWidget {
               ),
             );
           } else {
+            rangeController.setStart(rangeController.current);
+            rangeController.setCurrent(OnlyDate.noneDate());
             rangeController.setEnd(selectedDay);
+            rangeController.toggleDrawer();
           }
         }
       },
-      headerStyle: HeaderStyle(
+      headerStyle: const HeaderStyle(
         headerPadding: EdgeInsets.symmetric(vertical: 3),
         titleCentered: true,
         formatButtonVisible: false,
