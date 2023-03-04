@@ -9,7 +9,7 @@ class LoadScreen extends StatefulWidget {
 }
 
 class _LoadScreenState extends State<LoadScreen> {
-  bool isLoggedIn = true;
+  bool isLoggedIn = false;
 
   @override
   void initState() {

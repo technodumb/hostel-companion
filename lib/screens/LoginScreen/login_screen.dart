@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hostel_companion/controllers/provider/login_form.dart';
+import 'package:hostel_companion/controllers/provider/firebase_firestore_provider.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -9,10 +9,12 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    final _idController = context.read<LoginFormProvider>().idController;
-    final _passwordController =
-        context.read<LoginFormProvider>().passwordController;
-    final _loginFormKey = context.read<LoginFormProvider>().loginFormKey;
+    final _idController = TextEditingController();
+    final _passwordController = TextEditingController();
+    final _loginFormKey = GlobalKey<FormState>();
+    final FirebaseFirestoreProvider firebaseFirestoreProvider =
+        Provider.of<FirebaseFirestoreProvider>(context);
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -134,6 +136,18 @@ class LoginScreen extends StatelessWidget {
                         ),
                       ),
                       onPressed: () {
+                        String errorcode = firebaseFirestoreProvider.errorcode;
+                        User? currentUser =
+                            firebaseFirestoreProvider.currentUser;
+                        firebaseFirestoreProvider.checkUserAuth(
+                            _idController.text, _passwordController.text);
+                        if (errorcode == '') {
+                          Navigator.pushNamed(context, '/home');
+                        }
+                        else {
+                          if(errorcode = 'notReg')
+                        }
+
                         // if (_loginFormKey.currentState!.validate()) {
                         //   ScaffoldMessenger.of(context).showSnackBar(
                         //     const SnackBar(

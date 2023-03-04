@@ -52,15 +52,39 @@ class RangeTabContent extends StatelessWidget {
                     visible: rangeController.drawerExpand,
                     maintainSize: false,
                     child: Container(
-                      decoration: BoxDecoration(
-                          color: Color(0x20B5B5B5),
-                          borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(20),
-                            bottomRight: Radius.circular(20),
-                          )),
-                      height: width * 0.8,
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(20),
+                        ),
+                      ),
+                      height: width * 0.6,
                       width: double.infinity,
-                      child: CustomRangeCalendar(),
+                      child: const CustomRangeCalendar(),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 40,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (rangeController.start == OnlyDate.noneDate() ||
+                            rangeController.end == OnlyDate.noneDate())
+                          Icon(Icons.info_outline),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          rangeController.start == OnlyDate.noneDate()
+                              ? 'Select Start Date'
+                              : rangeController.end == OnlyDate.noneDate()
+                                  ? 'Select End Date'
+                                  : 'Selected ${rangeController.noOfDays} days (${rangeController.noOfDays - 3} mess cuts)',
+                          style: TextStyle(
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -103,27 +127,31 @@ class RangeTabContent extends StatelessWidget {
             SizedBox(
               height: 15,
             ),
-            MinTextButton(
-              onPressed: () {
-                rangeController.toggleDrawer(value: true);
-                rangeController.reset();
-              },
-              child: Container(
-                height: 40,
-                width: width * 0.45,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [
-                    Color(0xFFFF0000),
-                    Color(0x7FFF0000),
-                  ]),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
+            Visibility(
+              maintainSize: false,
+              visible: rangeController.start != OnlyDate.noneDate(),
+              child: MinTextButton(
+                onPressed: () {
+                  rangeController.toggleDrawer(value: true);
+                  rangeController.reset();
+                },
+                child: Container(
+                  height: 40,
+                  width: width * 0.45,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [
+                      Color(0xFFFF0000),
+                      Color(0x7FFF0000),
+                    ]),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
                   ),
                 ),
               ),
@@ -146,10 +174,10 @@ class CalendarDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    DateTime tomorrow = OnlyDate.tomorrow();
-    double height = MediaQuery.of(context).size.height;
     return Container(
       width: double.infinity,
+      decoration:
+          BoxDecoration(border: open ? Border(bottom: BorderSide()) : null),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
         child: Column(
@@ -244,14 +272,13 @@ class CustomRangeCalendar extends StatelessWidget {
           : rangeController.start,
       lastDay: OnlyDate(tomorrow.year, tomorrow.month + 4, tomorrow.day),
       shouldFillViewport: true,
-      currentDay: rangeController.current,
+      currentDay: OnlyDate.noneDate(),
       rangeStartDay: rangeController.start,
       rangeEndDay: rangeController.end,
       onDaySelected: (selectedDay, focusedDay) {
-        if (rangeController.current == OnlyDate.noneDate() &&
-            rangeController.start == OnlyDate.noneDate()) {
+        if (rangeController.start == OnlyDate.noneDate()) {
           // rangeController.setStart(selectedDay);
-          rangeController.setCurrent(selectedDay);
+          rangeController.setStart(selectedDay);
         } else if (rangeController.end == OnlyDate.noneDate()) {
           if (selectedDay.isBefore(rangeController.start)) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -260,8 +287,6 @@ class CustomRangeCalendar extends StatelessWidget {
               ),
             );
           } else {
-            rangeController.setStart(rangeController.current);
-            rangeController.setCurrent(OnlyDate.noneDate());
             rangeController.setEnd(selectedDay);
             rangeController.toggleDrawer();
           }

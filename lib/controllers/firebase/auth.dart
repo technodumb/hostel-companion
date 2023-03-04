@@ -1,43 +1,43 @@
 // firebase authentication
 
+import 'package:tuple/tuple.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class FlutterAuth {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<User?> signIn(String email, String password) async {
+  // sign in with email and password
+  // return the user if successful
+  // return error code if not successful instead of just printing
+  Future<Tuple2<User?, String>> signIn(String email, String password) async {
+    User? user;
+    String errorCode = '';
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      return userCredential.user;
+      user = userCredential.user;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        print('No user found for that email.');
-      } else if (e.code == 'wrong-password') {
-        print('Wrong password provided for that user.');
-      }
+      errorCode = e.code;
     }
-    return null;
+    return Tuple2(user, errorCode);
   }
 
-  Future<User?> signUp(String email, String password) async {
+  Future<Tuple2<User?, String>> signUp(String email, String password) async {
+    User? user;
+    String errorCode = '';
     try {
       UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      return userCredential.user;
+      user = userCredential.user;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
-      }
-    } catch (e) {
-      print(e);
+      errorCode = e.code;
     }
-    return null;
+    return Tuple2(user, errorCode);
   }
 
   Future<void> signOut() async {
