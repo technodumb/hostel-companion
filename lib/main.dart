@@ -3,8 +3,8 @@ import 'package:hostel_companion/controllers/provider/toggle_controller.dart';
 import 'package:hostel_companion/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'controllers/provider/firebase_firestore_provider.dart';
 import 'controllers/provider/food_data.dart';
-import 'controllers/provider/login_form.dart';
 import 'controllers/provider/range_controller.dart';
 import 'firebase_options.dart';
 
@@ -24,10 +24,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => LoginFormProvider()),
         ChangeNotifierProvider(create: (_) => ToggleController()),
         ChangeNotifierProvider(create: (_) => FoodData()),
         ChangeNotifierProvider(create: (_) => RangeController()),
+        ChangeNotifierProvider(create: (_) => FirebaseFirestoreProvider()),
       ],
       child: MaterialApp(
         title: 'Hostel Companion',
@@ -37,6 +37,7 @@ class MyApp extends StatelessWidget {
         // home: const HomeScreen(),
         initialRoute: '/load',
         routes: routes,
+        debugShowCheckedModeBanner: false,
       ),
     );
   }

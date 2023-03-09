@@ -19,15 +19,23 @@ class FlutterAuth {
       );
       user = userCredential.user;
     } on FirebaseAuthException catch (e) {
-      errorCode = e.code;
+      if (e.code == 'user-not-found' ||
+          e.code == 'wrong-password' ||
+          e.code == 'invalid-email') errorCode = e.code;
     }
     return Tuple2(user, errorCode);
   }
+
+  // void checkUserStatus() {
+  //   _auth
+  // }
 
   Future<Tuple2<User?, String>> signUp(String email, String password) async {
     User? user;
     String errorCode = '';
     try {
+      print(email);
+      print(password);
       UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
         email: email,
@@ -36,8 +44,19 @@ class FlutterAuth {
       user = userCredential.user;
     } on FirebaseAuthException catch (e) {
       errorCode = e.code;
+      print(errorCode);
     }
     return Tuple2(user, errorCode);
+  }
+
+  Future<String> resetPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      print(e.code);
+      return e.code;
+    }
+    return '';
   }
 
   Future<void> signOut() async {

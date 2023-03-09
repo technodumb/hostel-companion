@@ -10,7 +10,7 @@ class TabSwitcher extends StatelessWidget {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       // color: Colors.red,
       child: Row(
         children: [
@@ -21,7 +21,7 @@ class TabSwitcher extends StatelessWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               // minimumSize: Size.zero,
               fixedSize: Size(width * (isDaily ? 0.55 : 0.45), 50),
-              shape: RoundedRectangleBorder(
+              shape: const RoundedRectangleBorder(
                 borderRadius:
                     BorderRadius.only(bottomRight: Radius.circular(20)),
               ),
@@ -49,7 +49,7 @@ class TabSwitcher extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: isDaily
                     ? BorderRadius.zero
-                    : BorderRadius.only(
+                    : const BorderRadius.only(
                         bottomLeft: Radius.circular(20),
                       ),
               ),

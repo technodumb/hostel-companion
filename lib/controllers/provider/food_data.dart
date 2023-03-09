@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:hostel_companion/model/user_model.dart';
 
 class FoodData extends ChangeNotifier {
-  DateTime date = OnlyDate.tomorrow();
-  bool isFood = true;
+  DateTime date = (DateTime.now().hour < 21)
+      ? OnlyDate.tomorrow()
+      : OnlyDate.dayAfterTomorrow();
+  bool _isFood = true;
 
+  bool get isFood => _isFood;
   void toggleIsFood() {
-    isFood = !isFood;
+    _isFood = !_isFood;
     notifyListeners();
   }
 
@@ -15,13 +17,10 @@ class FoodData extends ChangeNotifier {
     notifyListeners();
   }
 
-  GlobalStorage globalStorage = GlobalStorage();
   String submit() {
-    if (isFood) {
-      globalStorage.user!.noFoodDates.add(date);
+    if (_isFood) {
       print("Added ${date.toString()}");
     } else {
-      globalStorage.user!.noFoodDates.remove(date);
       print("Removed ${date.toString()}");
     }
     return 'Submitted';
@@ -38,6 +37,11 @@ class OnlyDate extends DateTime {
   factory OnlyDate.tomorrow() {
     DateTime now = DateTime.now();
     return OnlyDate(now.year, now.month, now.day + 1);
+  }
+
+  factory OnlyDate.dayAfterTomorrow() {
+    DateTime now = DateTime.now();
+    return OnlyDate(now.year, now.month, now.day + 2);
   }
 
   factory OnlyDate.nextYear() {

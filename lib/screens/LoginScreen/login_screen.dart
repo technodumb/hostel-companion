@@ -1,19 +1,42 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hostel_companion/controllers/provider/firebase_firestore_provider.dart';
+import 'package:hostel_companion/global.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+  final loginFormKey = GlobalKey<FormState>();
+  LoginScreen({super.key});
+  final idController = TextEditingController();
+  final passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    final _idController = TextEditingController();
-    final _passwordController = TextEditingController();
-    final _loginFormKey = GlobalKey<FormState>();
     final FirebaseFirestoreProvider firebaseFirestoreProvider =
         Provider.of<FirebaseFirestoreProvider>(context);
+    void showEmailPasswordResetDialog() {
+      firebaseFirestoreProvider.firebaseAuth
+          .resetPassword(firebaseFirestoreProvider.currentEmail);
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Reset Password'),
+          content: Text(
+              'A password reset link has been sent to: \n${firebaseFirestoreProvider.currentEmail}\nLogin after resetting your password.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/login', (route) => false);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -54,14 +77,14 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
               Form(
-                key: _loginFormKey,
+                key: loginFormKey,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Column(
                   children: [
                     SizedBox(
                       width: width * 0.9,
                       child: TextFormField(
-                        controller: _idController,
+                        controller: idController,
                         decoration: InputDecoration(
                           hintText: 'College ID (eg. B21CS201)',
                           hintStyle: TextStyle(
@@ -89,7 +112,7 @@ class LoginScreen extends StatelessWidget {
                       width: width * 0.9,
                       child: TextFormField(
                         obscureText: true,
-                        controller: _passwordController,
+                        controller: passwordController,
                         decoration: InputDecoration(
                           hintText: 'Password',
                           hintStyle: TextStyle(
@@ -135,27 +158,22 @@ class LoginScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(25),
                         ),
                       ),
-                      onPressed: () {
+                      onPressed: () async {
+                        await firebaseFirestoreProvider.checkUserAuth(
+                            idController.text, passwordController.text);
                         String errorcode = firebaseFirestoreProvider.errorcode;
                         User? currentUser =
                             firebaseFirestoreProvider.currentUser;
-                        firebaseFirestoreProvider.checkUserAuth(
-                            _idController.text, _passwordController.text);
-                        if (errorcode == '') {
+                        print(errorcode);
+                        if (errorcode == '' && currentUser != null) {
                           Navigator.pushNamed(context, '/home');
+                        } else if (errorcode == 'not-resetted') {
+                          showEmailPasswordResetDialog();
+                        } else if (errorcode == 'first-login') {
+                          Navigator.pushNamed(context, '/firstlogin');
+                        } else {
+                          showSnackBar(context: context, message: errorcode);
                         }
-                        else {
-                          if(errorcode = 'notReg')
-                        }
-
-                        // if (_loginFormKey.currentState!.validate()) {
-                        //   ScaffoldMessenger.of(context).showSnackBar(
-                        //     const SnackBar(
-                        //       content: Text('Processing Data'),
-                        //     ),
-                        //   );
-                        // }
-                        // Navigator.pushNamed(context, '/firstlogin');
                       },
                       child: Container(
                         height: 50,

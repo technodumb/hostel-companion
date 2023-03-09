@@ -70,8 +70,8 @@ class RangeTabContent extends StatelessWidget {
                       children: [
                         if (rangeController.start == OnlyDate.noneDate() ||
                             rangeController.end == OnlyDate.noneDate())
-                          Icon(Icons.info_outline),
-                        SizedBox(
+                          const Icon(Icons.info_outline),
+                        const SizedBox(
                           width: 10,
                         ),
                         Text(
@@ -80,7 +80,7 @@ class RangeTabContent extends StatelessWidget {
                               : rangeController.end == OnlyDate.noneDate()
                                   ? 'Select End Date'
                                   : 'Selected ${rangeController.noOfDays} days (${rangeController.noOfDays - 3} mess cuts)',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                           ),
                         ),
@@ -90,7 +90,7 @@ class RangeTabContent extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 15,
             ),
             Visibility(
@@ -108,7 +108,7 @@ class RangeTabContent extends StatelessWidget {
 
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                       colors: [
                         Color(0xFF4200FF),
                         Color(0x7FBD00FF),
@@ -116,7 +116,7 @@ class RangeTabContent extends StatelessWidget {
                     ),
                     borderRadius: BorderRadius.circular(25),
                   ),
-                  child: Text('Submit',
+                  child: const Text('Submit',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -124,7 +124,7 @@ class RangeTabContent extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 15,
             ),
             Visibility(
@@ -140,13 +140,13 @@ class RangeTabContent extends StatelessWidget {
                   width: width * 0.45,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [
+                    gradient: const LinearGradient(colors: [
                       Color(0xFFFF0000),
                       Color(0x7FFF0000),
                     ]),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Cancel',
                     style: TextStyle(
                       color: Colors.white,
@@ -156,7 +156,7 @@ class RangeTabContent extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 15,
             ),
           ],
@@ -176,8 +176,8 @@ class CalendarDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      decoration:
-          BoxDecoration(border: open ? Border(bottom: BorderSide()) : null),
+      decoration: BoxDecoration(
+          border: open ? const Border(bottom: BorderSide()) : null),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
         child: Column(
@@ -185,7 +185,7 @@ class CalendarDrawer extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   'Set Date Range:',
                   style: TextStyle(
                     fontSize: 18,
@@ -204,7 +204,7 @@ class CalendarDrawer extends StatelessWidget {
               children: [
                 Text(
                   'Start Date: ${cleanDate(rangeController.start)}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     color: Colors.black,
                     fontWeight: FontWeight.w400,
@@ -212,7 +212,7 @@ class CalendarDrawer extends StatelessWidget {
                 ),
                 Text(
                   'End Date: ${cleanDate(rangeController.end)}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     color: Colors.black,
                     fontWeight: FontWeight.w400,

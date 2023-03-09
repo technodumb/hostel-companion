@@ -1,42 +1,80 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoadScreen extends StatefulWidget {
-  const LoadScreen({super.key});
-
   @override
-  State<LoadScreen> createState() => _LoadScreenState();
+  _LoadScreenState createState() => _LoadScreenState();
 }
 
 class _LoadScreenState extends State<LoadScreen> {
-  bool isLoggedIn = false;
+  bool isSignedIn = false;
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    // getIsLoggedIn();
+  Future<bool> checkInternetConnection() async {
+    print("checkInternetConnection");
+    try {
+      final result = await InternetAddress.lookup('google.com')
+          .timeout(Duration(seconds: 5));
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      }
+    } on SocketException catch (_) {
+      return false;
+    } on TimeoutException catch (_) {
+      return false;
+    }
+    return false;
   }
 
-  Widget build(BuildContext context) {
-    // wait for 3 seconds and then navigate to home screen
-    Future.delayed(const Duration(seconds: 3), () {
-      if (isLoggedIn) {
+  void _checkInternetConnectionAndNavigate() async {
+    print("checkInternetConnectionAndNavigate");
+    bool isConnected = await checkInternetConnection();
+    print("checkInternetConnectionAndNavigate");
+    if (isConnected) {
+      if (isSignedIn) {
         Navigator.pushNamed(context, '/home');
       } else {
         Navigator.pushNamed(context, '/login');
       }
-    });
-    // return a circular progress indicator
-    return Scaffold(
+    } else {
+      _retryDialog();
+    }
+  }
+
+  void _retryDialog() async {
+    print("retryDialog");
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("No internet connection"),
+            content:
+                Text("Please check your internet connection and try again."),
+            actions: <Widget>[
+              TextButton(
+                  child: Text("RETRY"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _checkInternetConnectionAndNavigate();
+                  })
+            ],
+          );
+        });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkInternetConnectionAndNavigate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
       body: Center(
         child: CircularProgressIndicator(),
       ),
     );
-  }
-
-  Future<void> getIsLoggedIn() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
   }
 }

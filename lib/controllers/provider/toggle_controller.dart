@@ -10,8 +10,8 @@ class ToggleController extends ChangeNotifier {
 
   bool _isFood = true;
   get isFood => _isFood;
-  void toggleIsFood() {
-    _isFood = !isFood;
+  void toggleIsFood({bool? value}) {
+    _isFood = value ?? !isFood;
     notifyListeners();
   }
 

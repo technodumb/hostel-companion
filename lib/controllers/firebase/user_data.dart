@@ -1,27 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hostel_companion/model/user_model.dart';
 
-class FirebaseDataGet {
+class UserData {
   final db = FirebaseFirestore.instance;
 
-  Future<void> getUserData() async {
+  Future<UserModel> getUserData(String username) async {
     try {
-      await db.collection('users').doc('id').get().then((value) {
-        print(value.data());
-      });
+      return await db.collection('users').doc(username).get().then(
+          (value) => UserModel.fromMap(value.data() as Map<String, dynamic>));
     } catch (e) {
-      print(e);
+      print("GetUserData: $e");
     }
+    // return null;
+    return UserModel.empty();
   }
 
   Future<void> putUserData(UserModel user) async {
     try {
-      db.collection('users').doc(user.id).set({
-        'name': user.name,
-        'email': user.email,
-        'id': user.id,
-        'noFoodDates': user.noFoodDates,
-      });
+      db.collection('users').doc(user.id).update(
+        {
+          'name': user.name,
+          'email': user.email,
+          'id': user.id,
+          'noFoodDates': user.noFoodDates,
+        },
+      );
     } catch (e) {
       print(e);
     }
@@ -38,14 +41,18 @@ class FirebaseDataGet {
     return null;
   }
 
-  Future<void> putMailToID(String id, String mail) async {
-    try {
-      db.collection('user_mails').doc(id).set({
-        'mail': mail,
-        'reset': 'false',
-      });
-    } catch (e) {
-      print(e);
-    }
-  }
+  // Future<void> putMailToID(String id, String mail) async {
+  //   try {
+  //     await db.collection('usernames').doc(id).set({
+  //       'email': mail,
+  //     });
+  //     await db.collection('users').doc(id).update(
+  //       {
+  //         'email': mail,
+  //       },
+  //     );
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
 }

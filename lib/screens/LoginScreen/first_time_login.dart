@@ -1,14 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:hostel_companion/controllers/provider/firebase_firestore_provider.dart';
+import 'package:hostel_companion/global.dart';
+import 'package:provider/provider.dart';
 
 class FirstTimeLoginScreen extends StatelessWidget {
-  const FirstTimeLoginScreen({super.key});
+  FirstTimeLoginScreen({super.key});
+  final TextEditingController _emailController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
 
-    final TextEditingController _emailController = TextEditingController();
+    FirebaseFirestoreProvider firebaseFirestoreProvider =
+        Provider.of<FirebaseFirestoreProvider>(context);
+
+    void showEmailPasswordResetDialog() {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Reset Password'),
+          content: Text(
+              'A password reset link has been sent to: \n${_emailController.text}\nLogin after resetting your password.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/login', (route) => false);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -48,7 +74,7 @@ class FirstTimeLoginScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              Text(
+              const Text(
                 'Seems like this is your first time logging in.\nEnter your college mail ID to reset your password.',
                 style: TextStyle(
                   color: Colors.black,
@@ -56,72 +82,88 @@ class FirstTimeLoginScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 30),
-              SizedBox(
-                width: width * 0.9,
-                height: 50,
-                child: TextField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    hintText: 'College Email ID',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 50),
-              TextButton(
-                style: TextButton.styleFrom(
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  minimumSize: Size.zero,
-                  padding: EdgeInsets.zero,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Reset Password'),
-                      content: Text(
-                          'A password reset link has been sent to: \n${_emailController.text}\nLogin after resetting your password.'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pushNamedAndRemoveUntil(
-                                context, '/login', (route) => false);
-                          },
-                          child: Text('OK'),
+              Form(
+                key: _formKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: width * 0.9,
+                      // height: 50,
+                      child: TextFormField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          hintText: 'College Email ID',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 20),
                         ),
-                      ],
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your college email ID';
+                          }
+                          // format for regualr expression
+                          // ignore: prefer_interpolation_to_compose_strings
+                          if (!RegExp(r'^[a-z0-9]+@mace.ac.in$')
+                              .hasMatch(value)) {
+                            return 'Please enter a valid college email ID';
+                          }
+                          return null;
+                        },
+                      ),
                     ),
-                  );
-                },
-                child: Container(
-                  height: 50,
-                  width: 200,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Color(0xFFFF0000),
-                        Color(0x7FFF0000),
-                      ],
+                    const SizedBox(height: 50),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        minimumSize: Size.zero,
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      onPressed: () async {
+                        if (!_formKey.currentState!.validate()) {
+                          return;
+                        }
+                        await firebaseFirestoreProvider.firstTimeSignUp(
+                            _emailController.text,
+                            firebaseFirestoreProvider.currentUsername);
+                        String errorcode = firebaseFirestoreProvider.errorcode;
+                        if (errorcode != '') {
+                          showSnackBar(context: context, message: errorcode);
+                        } else {
+                          showEmailPasswordResetDialog();
+                        }
+                      },
+                      child: Container(
+                        height: 50,
+                        width: 200,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [
+                              Color(0xFFFF0000),
+                              Color(0x7FFF0000),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: const Text(
+                          'Sign Up',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: const Text(
-                    'Sign Up',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
+                  ],
                 ),
               ),
             ],
