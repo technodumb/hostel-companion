@@ -1,26 +1,31 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hostel_companion/controllers/firebase/admin_data.dart';
 import 'package:hostel_companion/controllers/firebase/auth.dart';
 import 'package:hostel_companion/controllers/firebase/user_data.dart';
 import 'package:hostel_companion/controllers/firebase/usernames_data.dart';
+import 'package:hostel_companion/controllers/provider/food_data.dart';
 import 'package:hostel_companion/model/user_model.dart';
 import 'package:tuple/tuple.dart';
 
 class FirebaseFirestoreProvider extends ChangeNotifier {
   UsernameData usernameData = UsernameData();
   UserData userData = UserData();
+  AdminData adminData = AdminData();
   FlutterAuth firebaseAuth = FlutterAuth();
   UserModel _userModel = UserModel.empty();
   User? _currentUser = FirebaseAuth.instance.currentUser;
   String _errorcode = '';
   String _email = '';
   String _currentUsername = '';
+  List<DateTime> _dateRange = [];
 
   User? get currentUser => _currentUser;
   String get errorcode => _errorcode;
   String get currentUsername => _currentUsername;
   String get currentEmail => _email;
   UserModel get userModel => _userModel;
+  List<DateTime> get dateRange => _dateRange;
 
   Future<void> checkUserAuth(String username, String password) async {
     // String email;
@@ -35,7 +40,8 @@ class FirebaseFirestoreProvider extends ChangeNotifier {
       _errorcode = userAndError.item2;
       if (_errorcode == '' && _currentUser != null) {
         if (status == 'resetted') {
-          _userModel = await userData.getUserData(username);
+          // _userModel = await userData.getUserData(username);
+          await getCurrentUserData();
           print("usermodel-date: ${_userModel.name}");
         } else if (status == 'with-mail') {
           if (username != password) {
@@ -91,7 +97,23 @@ class FirebaseFirestoreProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<UserModel> getCurrentUserData() async {
-    return await userData.getUserData(_currentUsername);
+  Future<void> getCurrentUserData() async {
+    _userModel = await userData.getUserData(_currentUsername);
+    notifyListeners();
+  }
+
+  void setRange(
+      {required OnlyDate start, required OnlyDate end, bool? remove}) {
+    // get date range between start and end and store it in _userModel.noFoodDates
+    _dateRange = List.generate(end.difference(start).inDays + 1,
+        (index) => DateTime(start.year, start.month, start.day + index));
+    remove ?? false
+        ? _userModel.noFoodDates
+            .removeWhere((element) => dateRange.contains(element))
+        : _userModel.noFoodDates.addAll(dateRange);
+    // _userModel.noFoodDates
+    _userModel.noFoodDates = _userModel.noFoodDates.toSet().toList();
+    print(_userModel.noFoodDates);
+    notifyListeners();
   }
 }

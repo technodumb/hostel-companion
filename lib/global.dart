@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Map<String, String> error_messages = {
+Map<String, String> errorMessages = {
   'invalid-email': 'Enter a valid College Email ID',
   'not-in-list': 'Username or password is incorrect',
   'wrong-password': 'Username or password is incorrect',
@@ -11,7 +11,6 @@ Map<String, String> error_messages = {
   'user-disabled': 'User disabled',
   'operation-not-allowed': 'Operation not allowed',
   'email-already-exists': 'Email already exists',
-  'operation-not-allowed': 'Operation not allowed. Please Contact the admins',
 };
 
 void showSnackBar(
@@ -20,10 +19,18 @@ void showSnackBar(
     required String message}) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
-      content: Text(error_messages[message] ??
+      content: Text(errorMessages[message] ??
           'An error has occured. Please try again later.'),
       duration: const Duration(seconds: 2),
       backgroundColor: color,
     ),
   );
 }
+
+Map<String, String> hostelName = {
+  'DJ': 'Diamond Jubilee Hostel',
+  'K': 'Kennedy Hostel',
+  'MB': 'Mar Baselios Hostel',
+  'HS1': 'Haile Selassie Hostel - I',
+  'HS2': 'Haile Selassie Hostel - II',
+};

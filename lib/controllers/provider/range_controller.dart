@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:hostel_companion/controllers/provider/food_data.dart';
 
@@ -28,11 +26,13 @@ class RangeController extends ChangeNotifier {
     _start = OnlyDate.noneDate();
     _end = OnlyDate.noneDate();
     noOfDays = 0;
+    _drawerExpanded = true;
     notifyListeners();
   }
 
   void toggleDrawer({bool? value}) {
     _drawerExpanded = value ?? !_drawerExpanded;
+    // _drawerExpanded = true;
     notifyListeners();
   }
 }

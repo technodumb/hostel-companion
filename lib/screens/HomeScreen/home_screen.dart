@@ -1,14 +1,22 @@
+import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:hostel_companion/components/drawer.dart';
 import 'package:hostel_companion/components/min_text_button.dart';
-import 'package:hostel_companion/controllers/firebase/user_data.dart';
 import 'package:hostel_companion/controllers/provider/firebase_firestore_provider.dart';
 import 'package:hostel_companion/model/user_model.dart';
 import 'package:provider/provider.dart';
 
 import 'HomeScreenTabs/tab_content.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +24,13 @@ class HomeScreen extends StatelessWidget {
     double height = MediaQuery.of(context).size.height;
     FirebaseFirestoreProvider firebaseFirestoreProvider =
         Provider.of<FirebaseFirestoreProvider>(context);
-    UserModel userModel =
-        firebaseFirestoreProvider.userModel ?? UserModel.empty();
+    UserModel userModel = firebaseFirestoreProvider.userModel;
+    // Barcode barcode = Barcode.code128();
+    // barcode.toSvg(userModel.id, width: 750, height: 150);
+
     return Scaffold(
+      key: _scaffoldKey,
+      drawer: CustomDrawer(),
       body: SafeArea(
         child: Column(
           children: [
@@ -50,30 +62,35 @@ class HomeScreen extends StatelessWidget {
                             fontFamily: 'Inter',
                           ),
                         ),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(200),
-                          child: Image.asset(
-                            'assets/images/mozartiscute.jpg',
-                            height: height * 0.2,
-                            width: height * 0.2,
-                            fit: BoxFit.cover,
-                            alignment: Alignment.topCenter,
-                          ),
-                        ),
                         Text(
                           // 'Wolfgang Amadeus Mozart',
                           userModel.name,
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
+                              fontSize: 24,
                               fontFamily: 'Inter'),
                         ),
                         Text(
                           userModel.id,
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
+                              fontSize: 18,
                               fontFamily: 'Inter'),
+                        ),
+                        Container(
+                          height: width * 0.2,
+                          width: width * 0.9,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 25, vertical: 10),
+                          child: BarcodeWidget(
+                            barcode: Barcode.code128(),
+                            data: userModel.id,
+                            drawText: false,
+                          ),
                         ),
                       ],
                     ),
@@ -81,58 +98,20 @@ class HomeScreen extends StatelessWidget {
                 ),
                 Container(
                   width: double.infinity,
-                  alignment: Alignment.centerRight,
-                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  alignment: Alignment.centerLeft,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                   child: MinTextButton(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Container(
-                      height: 40,
-                      width: 40,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(20)),
-                      child: Icon(
-                        Icons.logout,
-                        color: Colors.white,
-                        size: 20,
-                      ),
+                    child: const Icon(
+                      Icons.menu,
+                      color: Colors.white,
+                      size: 24,
                     ),
                     onPressed: () {
-                      showDialog(
-                          barrierDismissible: false,
-                          context: context,
-                          builder: (context) => AlertDialog(
-                                title: Text('Signing Out?'),
-                                content: Text(
-                                    'You are about to sign out. Press Ok to confirm'),
-                                actions: [
-                                  TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: Text('Cancel')),
-                                  TextButton(
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: Colors.blue,
-                                      ),
-                                      onPressed: () {
-                                        firebaseFirestoreProvider.signOut();
-                                        Navigator.pushNamedAndRemoveUntil(
-                                            context,
-                                            '/login',
-                                            (route) => false);
-                                        Future.delayed((Duration(seconds: 5)),
-                                            () => print(userModel.name));
-                                      },
-                                      child: Text(
-                                        'Sign Out',
-                                        style: TextStyle(color: Colors.white),
-                                      )),
-                                ],
-                              ));
+                      _scaffoldKey.currentState?.openDrawer();
                     },
                   ),
                 ),
@@ -145,3 +124,142 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+
+
+      // drawer: Drawer(
+      //   child: Column(
+      //     children: [
+      //       Container(
+      //         height: height * 0.3,
+      //         width: double.infinity,
+      //         decoration: const BoxDecoration(
+      //           gradient: LinearGradient(
+      //             begin: Alignment.topCenter,
+      //             end: Alignment.bottomCenter,
+      //             colors: [
+      //               Color(0xFF0066FF),
+      //               Color(0xFF00D6FF),
+      //             ],
+      //           ),
+      //         ),
+      //         child: Center(
+      //           child: Column(
+      //             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      //             children: [
+      //               const Text(
+      //                 'Welcome back,',
+      //                 style: TextStyle(
+      //                   color: Colors.white,
+      //                   fontSize: 32,
+      //                   fontFamily: 'Inter',
+      //                 ),
+      //               ),
+      //               // ClipRRect(
+      //               //   borderRadius: BorderRadius.circular(200),
+      //               //   child: Image.asset(
+      //               //     'assets/images/mozartiscute.jpg',
+      //               //     height: height * 0.2,
+      //               //     width: height * 0.2,
+      //               //     fit: BoxFit.cover,
+      //               //     alignment: Alignment.topCenter,
+      //               //   ),
+      //               // ),
+      //               Text(
+      //                 // 'Wolfgang Amadeus Mozart',
+      //                 userModel.name,
+      //                 style: const TextStyle(
+      //                     color: Colors.white,
+      //                     fontSize: 24,
+      //                     fontFamily: 'Inter'),
+      //               ),
+      //               Text(
+      //                 userModel.id,
+      //                 style: const TextStyle(
+      //                     color: Colors.white,
+      //                     fontSize: 18,
+      //                     fontFamily: 'Inter'),
+      //               ),
+      //               Container(
+      //                 height: 100,
+      //                 width: 100,
+      //                 child: BarcodeWidget(
+      //                   barcode: Barcode.code128(),
+      //                   data: userModel.id,
+      //                   drawText: false,
+      //                 ),
+      //               ),
+      //             ],
+      //           ),
+      //         ),
+      //       ),
+      //       const SizedBox(
+      //         height: 20,
+      //       ),
+      //       MinTextButton(
+      //         child: Text('Logout'),
+      //         onPressed: () {
+      //           firebaseFirestoreProvider.firebaseAuth.signOut();
+      //         },
+      //       ),
+      //     ],
+      //   ),
+      // ),
+
+
+                        // ClipRRect(
+                        //   borderRadius: BorderRadius.circular(200),
+                        //   child: Image.asset(
+                        //     'assets/images/mozartiscute.jpg',
+                        //     height: height * 0.2,
+                        //     width: height * 0.2,
+                        //     fit: BoxFit.cover,
+                        //     alignment: Alignment.topCenter,
+                        //   ),
+                        // ),
+
+
+// ClipRRect(
+                        //   borderRadius: BorderRadius.circular(200),
+                        //   child: Image.asset(
+                        //     'assets/images/mozartiscute.jpg',
+                        //     height: height * 0.2,
+                        //     width: height * 0.2,
+                        //     fit: BoxFit.cover,
+                        //     alignment: Alignment.topCenter,
+                        //   ),
+                        // ),
+
+
+//   showDialog(
+                    //       barrierDismissible: false,
+                    //       context: context,
+                    //       builder: (context) => AlertDialog(
+                    //             title: const Text('Signing Out?'),
+                    //             content: const Text(
+                    //                 'You are about to sign out. Press Ok to confirm'),
+                    //             actions: [
+                    //               TextButton(
+                    //                   onPressed: () {
+                    //                     Navigator.pop(context);
+                    //                   },
+                    //                   child: Text('Cancel')),
+                    //               TextButton(
+                    //                   style: TextButton.styleFrom(
+                    //                     backgroundColor: Colors.blue,
+                    //                   ),
+                    //                   onPressed: () {
+                    //                     firebaseFirestoreProvider.signOut();
+                    //                     Navigator.pushNamedAndRemoveUntil(
+                    //                         context,
+                    //                         '/login',
+                    //                         (route) => false);
+                    //                     Future.delayed((Duration(seconds: 5)),
+                    //                         () => print(userModel.name));
+                    //                   },
+                    //                   child: const Text(
+                    //                     'Sign Out',
+                    //                     style: TextStyle(color: Colors.white),
+                    //                   )),
+                    //             ],
+                    //           ));
+                    // },

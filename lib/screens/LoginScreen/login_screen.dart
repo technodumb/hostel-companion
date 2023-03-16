@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hostel_companion/controllers/provider/firebase_firestore_provider.dart';
+import 'package:hostel_companion/controllers/provider/food_data.dart';
+import 'package:hostel_companion/controllers/provider/toggle_controller.dart';
 import 'package:hostel_companion/global.dart';
 import 'package:provider/provider.dart';
 
@@ -16,6 +18,9 @@ class LoginScreen extends StatelessWidget {
     double width = MediaQuery.of(context).size.width;
     final FirebaseFirestoreProvider firebaseFirestoreProvider =
         Provider.of<FirebaseFirestoreProvider>(context);
+    final FoodData foodData = Provider.of<FoodData>(context);
+    final ToggleController toggleData = Provider.of<ToggleController>(context);
+
     void showEmailPasswordResetDialog() {
       firebaseFirestoreProvider.firebaseAuth
           .resetPassword(firebaseFirestoreProvider.currentEmail);
@@ -115,7 +120,7 @@ class LoginScreen extends StatelessWidget {
                         controller: passwordController,
                         decoration: InputDecoration(
                           hintText: 'Password',
-                          hintStyle: TextStyle(
+                          hintStyle: const TextStyle(
                             color: Color(0x3D000000),
                           ),
                           border: OutlineInputBorder(
@@ -141,7 +146,7 @@ class LoginScreen extends StatelessWidget {
                         style: TextButton.styleFrom(
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           minimumSize: Size.zero,
-                          padding: EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(10),
                         ),
                         child: const Text('Forgot Password?'),
                       ),
@@ -166,11 +171,29 @@ class LoginScreen extends StatelessWidget {
                             firebaseFirestoreProvider.currentUser;
                         print(errorcode);
                         if (errorcode == '' && currentUser != null) {
-                          Navigator.pushNamed(context, '/home');
+                          List<DateTime> noFoodDates =
+                              firebaseFirestoreProvider.userModel.noFoodDates;
+
+                          noFoodDates = noFoodDates.where((date) {
+                            return date.isAfter(DateTime.now());
+                          }).toList();
+                          firebaseFirestoreProvider.userModel.noFoodDates =
+                              noFoodDates;
+                          print(noFoodDates);
+                          if (noFoodDates.contains(foodData.date)) {
+                            toggleData.toggleIsFood(value: false);
+                            foodData.toggleIsFood(value: false);
+                          } else {
+                            toggleData.toggleIsFood(value: true);
+                            foodData.toggleIsFood(value: true);
+                          }
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, '/home', (route) => false);
                         } else if (errorcode == 'not-resetted') {
                           showEmailPasswordResetDialog();
                         } else if (errorcode == 'first-login') {
-                          Navigator.pushNamed(context, '/firstlogin');
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, '/firstlogin', (route) => false);
                         } else {
                           showSnackBar(context: context, message: errorcode);
                         }

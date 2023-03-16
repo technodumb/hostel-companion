@@ -7,23 +7,14 @@ class FoodData extends ChangeNotifier {
   bool _isFood = true;
 
   bool get isFood => _isFood;
-  void toggleIsFood() {
-    _isFood = !_isFood;
+  void toggleIsFood({bool? value}) {
+    _isFood = value ?? !_isFood;
     notifyListeners();
   }
 
   void setDate(DateTime newDate) {
     date = OnlyDate(newDate.year, newDate.month, newDate.day);
     notifyListeners();
-  }
-
-  String submit() {
-    if (_isFood) {
-      print("Added ${date.toString()}");
-    } else {
-      print("Removed ${date.toString()}");
-    }
-    return 'Submitted';
   }
 }
 

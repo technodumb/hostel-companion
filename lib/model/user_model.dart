@@ -1,16 +1,12 @@
-import 'package:hostel_companion/controllers/provider/food_data.dart';
-
 class UserModel {
   final String name;
   final String email;
   final String id;
-  final int messNo;
   final String hostel;
   final String roomNo;
-  final List<DateTime> noFoodDates;
+  List<DateTime> noFoodDates;
   // contructor
   UserModel({
-    required this.messNo,
     required this.hostel,
     required this.roomNo,
     required this.name,
@@ -32,7 +28,6 @@ class UserModel {
         email: data['email'],
         id: data['id'],
         noFoodDates: noFoodDatesDateTime,
-        messNo: data['messNo'],
         hostel: data['hostel'],
         roomNo: data['roomNo'],
       );
@@ -54,12 +49,12 @@ class UserModel {
 
   static UserModel empty() {
     return UserModel(
-        name: '',
-        email: '',
-        id: '',
-        noFoodDates: [],
-        hostel: '',
-        roomNo: '',
-        messNo: 0);
+      name: '',
+      email: '',
+      id: '',
+      noFoodDates: [],
+      hostel: '',
+      roomNo: '',
+    );
   }
 }

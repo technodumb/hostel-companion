@@ -14,11 +14,4 @@ class ToggleController extends ChangeNotifier {
     _isFood = value ?? !isFood;
     notifyListeners();
   }
-
-  bool _isUnchanged = true;
-  get isUnchanged => _isUnchanged;
-  void toggleIsUnchanged() {
-    _isUnchanged = !isUnchanged;
-    notifyListeners();
-  }
 }

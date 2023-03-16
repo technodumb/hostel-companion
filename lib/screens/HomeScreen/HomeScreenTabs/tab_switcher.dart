@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hostel_companion/controllers/provider/firebase_firestore_provider.dart';
+import 'package:hostel_companion/controllers/provider/food_data.dart';
 import 'package:hostel_companion/controllers/provider/toggle_controller.dart';
 import 'package:provider/provider.dart';
 
@@ -9,6 +11,13 @@ class TabSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
+    ToggleController toggleController = context.read<ToggleController>();
+    FoodData foodData = context.read<FoodData>();
+    List<DateTime> noFoodDates =
+        context.watch<FirebaseFirestoreProvider>().userModel.noFoodDates;
+    DateTime nextDay = DateTime.now().hour < 21
+        ? OnlyDate.tomorrow()
+        : OnlyDate.dayAfterTomorrow();
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 2),
       // color: Colors.red,
@@ -27,7 +36,15 @@ class TabSwitcher extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              context.read<ToggleController>().setIsDaily = true;
+              foodData.setDate(nextDay);
+              if (noFoodDates.contains(nextDay)) {
+                foodData.toggleIsFood(value: false);
+                toggleController.toggleIsFood(value: false);
+              } else {
+                foodData.toggleIsFood(value: true);
+                toggleController.toggleIsFood(value: true);
+              }
+              toggleController.setIsDaily = true;
             },
             child: Text(
               'Daily',

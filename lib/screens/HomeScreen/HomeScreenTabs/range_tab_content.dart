@@ -1,7 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hostel_companion/components/min_text_button.dart';
+import 'package:hostel_companion/controllers/firebase/user_data.dart';
+import 'package:hostel_companion/controllers/provider/firebase_firestore_provider.dart';
 import 'package:hostel_companion/controllers/provider/food_data.dart';
 import 'package:hostel_companion/controllers/provider/range_controller.dart';
+import 'package:hostel_companion/screens/LoginScreen/first_time_login.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -17,6 +21,8 @@ class RangeTabContent extends StatelessWidget {
 
     final RangeController rangeController =
         Provider.of<RangeController>(context);
+    final FirebaseFirestoreProvider firestoreData =
+        Provider.of<FirebaseFirestoreProvider>(context);
 
     return SingleChildScrollView(
       child: Padding(
@@ -79,7 +85,7 @@ class RangeTabContent extends StatelessWidget {
                               ? 'Select Start Date'
                               : rangeController.end == OnlyDate.noneDate()
                                   ? 'Select End Date'
-                                  : 'Selected ${rangeController.noOfDays} days (${rangeController.noOfDays - 3} mess cuts)',
+                                  : 'Selected ${rangeController.noOfDays} days ',
                           style: const TextStyle(
                             fontSize: 14,
                           ),
@@ -96,32 +102,86 @@ class RangeTabContent extends StatelessWidget {
             Visibility(
               visible: rangeController.start != OnlyDate.noneDate() &&
                   rangeController.end != OnlyDate.noneDate(),
-              child: MinTextButton(
-                onPressed: () {},
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Container(
-                  height: 50,
-                  width: width * 0.5,
-                  // padding: const EdgeInsets.symmetric(horizontal: 20),
-
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF4200FF),
-                        Color(0x7FBD00FF),
-                      ],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  MinTextButton(
+                    onPressed: () {
+                      firestoreData.setRange(
+                        start: rangeController.start,
+                        end: rangeController.end,
+                        remove: true,
+                      );
+                      firestoreData.userData
+                          .putUserData(firestoreData.userModel);
+                      firestoreData.adminData.addDateToAdmin(
+                          firestoreData.userModel, firestoreData.dateRange);
+                      rangeController.reset();
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    borderRadius: BorderRadius.circular(25),
+                    child: Container(
+                      height: 50,
+                      width: width * 0.4,
+                      // padding: const EdgeInsets.symmetric(horizontal: 20),
+
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFF0000FF),
+                            Color(0x7FBD00FF),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: const Text('Food',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                          )),
+                    ),
                   ),
-                  child: const Text('Submit',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                      )),
-                ),
+                  MinTextButton(
+                    onPressed: () {
+                      firestoreData.setRange(
+                        start: rangeController.start,
+                        end: rangeController.end,
+                      );
+                      firestoreData.userData
+                          .putUserData(firestoreData.userModel);
+
+                      firestoreData.adminData.addDateToAdmin(
+                          firestoreData.userModel, firestoreData.dateRange);
+                      rangeController.reset();
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Container(
+                      height: 50,
+                      width: width * 0.4,
+                      // padding: const EdgeInsets.symmetric(horizontal: 20),
+
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFFFF0000),
+                            Color(0x7FD93D3D),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: const Text('No Food',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                          )),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(
@@ -140,16 +200,17 @@ class RangeTabContent extends StatelessWidget {
                   width: width * 0.45,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [
-                      Color(0xFFFF0000),
-                      Color(0x7FFF0000),
-                    ]),
+                    // gradient: const LinearGradient(colors: [
+                    //   // Color(0xFFFF0000),
+                    //   // Color(0x7FFF0000),
+                    // ]),
+                    border: Border.all(color: Colors.black),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text(
                     'Cancel',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontSize: 18,
                     ),
                   ),
@@ -263,12 +324,18 @@ class CustomRangeCalendar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     DateTime tomorrow = OnlyDate.tomorrow();
+    DateTime dayAfterTomorrow = OnlyDate.dayAfterTomorrow();
     RangeController rangeController = Provider.of<RangeController>(context);
+
+    List<DateTime> noFoodDates =
+        context.watch<FirebaseFirestoreProvider>().userModel.noFoodDates;
     return TableCalendar(
       availableGestures: AvailableGestures.horizontalSwipe,
-      firstDay: OnlyDate(tomorrow.year, tomorrow.month, 1),
+      firstDay: DateTime.now().hour < 21 ? tomorrow : dayAfterTomorrow,
       focusedDay: rangeController.start == OnlyDate.noneDate()
-          ? tomorrow
+          ? DateTime.now().hour < 21
+              ? tomorrow
+              : dayAfterTomorrow
           : rangeController.start,
       lastDay: OnlyDate(tomorrow.year, tomorrow.month + 4, tomorrow.day),
       shouldFillViewport: true,
@@ -300,6 +367,97 @@ class CustomRangeCalendar extends StatelessWidget {
           fontSize: 16,
           color: Colors.black,
         ),
+      ),
+      calendarStyle: CalendarStyle(
+        rangeHighlightColor: Color(0x7FFF7A00),
+      ),
+      calendarBuilders: CalendarBuilders(
+        defaultBuilder: (context, date, _) {
+          // for (DateTime d in firestoreData.userModel.noFoodDates) {
+          if (noFoodDates.contains(OnlyDate.fromDate(date))) {
+            return Container(
+              margin: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: Color(0x7FFF0000),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Center(
+                child: Text(
+                  date.day.toString(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            );
+          }
+          // }
+          return null;
+        },
+        rangeStartBuilder: (context, day, focusedDay) {
+          return Container(
+            alignment: Alignment.center,
+            margin: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: Color(0xFFFF7A00),
+              borderRadius: BorderRadius.circular(20),
+              border: noFoodDates.contains(OnlyDate.fromDate(day))
+                  ? Border.all(color: Colors.black, width: 2)
+                  : null,
+            ),
+            child: Text(
+              day.day.toString(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+          );
+        },
+        rangeEndBuilder: (context, day, focusedDay) => Container(
+          alignment: Alignment.center,
+          margin: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            color: Color(0xFFFF7A00),
+            borderRadius: BorderRadius.circular(20),
+            border: noFoodDates.contains(OnlyDate.fromDate(day))
+                ? Border.all(color: Colors.black, width: 2)
+                : null,
+          ),
+          child: Text(
+            day.day.toString(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+          ),
+        ),
+        withinRangeBuilder: (context, day, focusedDay) {
+          if (noFoodDates.contains(OnlyDate.fromDate(day))) {
+            return Container(
+              margin: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                // color: Color(0x7F0066FF),
+                border: Border.all(
+                  // color: Color(0x7F0066FF),
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Center(
+                child: Text(
+                  day.day.toString(),
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            );
+          }
+          return null;
+        },
       ),
     );
   }

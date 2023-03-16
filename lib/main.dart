@@ -19,15 +19,17 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ToggleController()),
-        ChangeNotifierProvider(create: (_) => FoodData()),
-        ChangeNotifierProvider(create: (_) => RangeController()),
-        ChangeNotifierProvider(create: (_) => FirebaseFirestoreProvider()),
+        ChangeNotifierProvider<FirebaseFirestoreProvider>(
+            create: (_) => FirebaseFirestoreProvider()),
+        ChangeNotifierProvider<FoodData>(create: (_) => FoodData()),
+        ChangeNotifierProvider<ToggleController>(
+            create: (_) => ToggleController()),
+        ChangeNotifierProvider<RangeController>(
+            create: (_) => RangeController())
       ],
       child: MaterialApp(
         title: 'Hostel Companion',

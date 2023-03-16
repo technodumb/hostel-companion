@@ -5,7 +5,7 @@ import 'screens/LoginScreen/login_screen.dart';
 
 var routes = {
   '/load': (context) => LoadScreen(),
-  '/home': (context) => const HomeScreen(),
+  '/home': (context) => HomeScreen(),
   '/login': (context) => LoginScreen(),
   '/firstlogin': (context) => FirstTimeLoginScreen(),
 };
