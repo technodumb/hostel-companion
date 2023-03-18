@@ -19,6 +19,7 @@ class FirebaseFirestoreProvider extends ChangeNotifier {
   String _email = '';
   String _currentUsername = '';
   List<DateTime> _dateRange = [];
+  bool isAdmin = false;
 
   User? get currentUser => _currentUser;
   String get errorcode => _errorcode;
@@ -32,14 +33,18 @@ class FirebaseFirestoreProvider extends ChangeNotifier {
     String status = await usernameData.getUserStatus(username);
     _currentUsername = username;
     print(status);
-    if (status == 'resetted' || status == 'with-mail') {
+    if (status == 'resetted' || status == 'with-mail' || status == 'admin') {
       _email = await usernameData.getEmailFromUsername(username);
       Tuple2<User?, String> userAndError =
           await firebaseAuth.signIn(_email, password);
       _currentUser = userAndError.item1;
       _errorcode = userAndError.item2;
       if (_errorcode == '' && _currentUser != null) {
-        if (status == 'resetted') {
+        if (status == 'admin') {
+          isAdmin = true;
+          await getCurrentUserData();
+          print("usermodel-date: ${_userModel.name}");
+        } else if (status == 'resetted') {
           // _userModel = await userData.getUserData(username);
           await getCurrentUserData();
           print("usermodel-date: ${_userModel.name}");

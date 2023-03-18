@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hostel_companion/components/min_text_button.dart';
 import 'package:hostel_companion/controllers/provider/firebase_firestore_provider.dart';
+import 'package:hostel_companion/global.dart';
 import 'package:provider/provider.dart';
 
 class CustomDrawer extends StatelessWidget {
@@ -8,7 +9,7 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    FirebaseFirestoreProvider _firestoreProvider =
+    FirebaseFirestoreProvider firestoreProvider =
         Provider.of<FirebaseFirestoreProvider>(context);
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
@@ -43,8 +44,8 @@ class CustomDrawer extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(15),
+                  const Padding(
+                    padding: EdgeInsets.all(15),
                     child: Text(
                       'MACE Men\'s Hostel Companion App',
                       style: TextStyle(
@@ -55,7 +56,7 @@ class CustomDrawer extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  Divider(
+                  const Divider(
                     color: Colors.white,
                     thickness: 1,
                   ),
@@ -67,32 +68,32 @@ class CustomDrawer extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Name: ${_firestoreProvider.userModel.name}',
-                            style: TextStyle(
+                            'Name: ${firestoreProvider.userModel.name}',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w300,
                             ),
                           ),
                           Text(
-                            'College ID: ${_firestoreProvider.userModel.id}',
-                            style: TextStyle(
+                            'College ID: ${firestoreProvider.userModel.id}',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w300,
                             ),
                           ),
                           Text(
-                            'Hostel: ${_firestoreProvider.userModel.hostel}',
-                            style: TextStyle(
+                            'Hostel: ${hostelName[firestoreProvider.userModel.hostel]}',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w300,
                             ),
                           ),
                           Text(
-                            'Room No: ${_firestoreProvider.userModel.roomNo}',
-                            style: TextStyle(
+                            'Room No: ${firestoreProvider.userModel.roomNo}',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w300,
@@ -105,28 +106,41 @@ class CustomDrawer extends StatelessWidget {
                 ],
               ),
             ),
-            DrawerButtons(
-              text: 'Admin Panel',
-              icon: Icon(Icons.admin_panel_settings),
-              onPressed: () => Navigator.of(context).pushNamed('/admin'),
-            ),
+            if (firestoreProvider.isAdmin)
+              DrawerButtons(
+                text: 'Admin Panel',
+                icon: Icons.admin_panel_settings,
+                onPressed: () => Navigator.of(context).pushNamed('/admin'),
+              ),
             DrawerButtons(
               text: 'Post Complaints',
-              icon: Icon(Icons.note_add),
-              onPressed: () => PostComplaintDialog(context),
+              icon: Icons.note_add,
+              onPressed: () => PostComplaintDialog(),
             ),
             DrawerButtons(
                 text: 'Check for updates',
-                icon: Icon(Icons.update),
+                icon: Icons.update,
                 onPressed: () => CheckForUpdatesDialog()),
             DrawerButtons(
                 text: 'Change Password',
-                icon: Icon(Icons.lock_reset),
-                onPressed: () => ChangePasswordDialog()),
+                icon: Icons.lock_reset,
+                onPressed: () => showDialog(
+                    context: context,
+                    builder: (context) => ChangePasswordDialog(
+                          resetPassword:
+                              firestoreProvider.firebaseAuth.resetPassword,
+                          email: firestoreProvider.userModel.email,
+                        ))),
             DrawerButtons(
                 text: 'Logout',
-                icon: Icon(Icons.logout),
-                onPressed: () => LogoutDialog()),
+                icon: Icons.logout,
+                logout: true,
+                onPressed: () => showDialog(
+                      context: context,
+                      builder: (context) => LogoutDialog(
+                        signOut: firestoreProvider.signOut,
+                      ),
+                    )),
           ],
         ),
       ),
@@ -137,35 +151,160 @@ class CustomDrawer extends StatelessWidget {
 class DrawerButtons extends StatelessWidget {
   final String text;
   final Function() onPressed;
-  final Icon icon;
-  final Color color;
+  final IconData icon;
+  final bool logout;
   const DrawerButtons(
       {super.key,
       required this.text,
       required this.icon,
       required this.onPressed,
-      this.color = Colors.black});
+      this.logout = false});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: MinTextButton(
-        onPressed: onPressed,
+    return MinTextButton(
+      onPressed: onPressed,
+      child: Container(
+        padding: const EdgeInsets.all(15),
         child: Row(
           children: [
-            icon,
-            const SizedBox(width: 10),
+            Icon(
+              icon,
+              size: 24,
+              color: logout ? Colors.red : Colors.black,
+            ),
+            const SizedBox(width: 20),
             Text(
               text,
               style: TextStyle(
-                color: color,
-                fontSize: 16,
+                color: logout ? Colors.red : Colors.black,
+                fontSize: 15,
                 fontWeight: FontWeight.w300,
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class PostComplaintDialog extends StatelessWidget {
+  final TextEditingController complaintController = TextEditingController();
+  PostComplaintDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SimpleDialog(
+      title: const Text('Post Complaint'),
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(15),
+          child: Column(
+            children: [
+              TextField(
+                decoration: const InputDecoration(
+                  labelText: 'Complaint',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 5,
+                controller: complaintController,
+              ),
+              const SizedBox(height: 20),
+              MinTextButton(
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (context) => const AlertDialog(
+                            title: Text('Complaint Posted'),
+                            content: Text(
+                                'Your complaint has been posted successfully.'),
+                          ));
+                },
+                child: const Text('Post'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class CheckForUpdatesDialog extends StatelessWidget {
+  const CheckForUpdatesDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
+
+class ChangePasswordDialog extends StatelessWidget {
+  final Function(String) resetPassword;
+  final String email;
+  const ChangePasswordDialog(
+      {super.key, required this.resetPassword, required this.email});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Change Password'),
+      content: const Text('Are you sure you want to change your password?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('No'),
+        ),
+        TextButton(
+          onPressed: () {
+            resetPassword(email).then((value) {
+              Navigator.of(context).pop();
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Password Reset'),
+                  content: const Text(
+                      'A password reset link has been sent to your email'),
+                  actions: [
+                    TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Ok'))
+                  ],
+                ),
+              );
+            });
+          },
+          child: const Text('Yes'),
+        ),
+      ],
+    );
+  }
+}
+
+class LogoutDialog extends StatelessWidget {
+  final Function() signOut;
+  const LogoutDialog({super.key, required this.signOut});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Logout'),
+      content: const Text('Are you sure you want to logout?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('No'),
+        ),
+        TextButton(
+          onPressed: () {
+            signOut();
+            Navigator.pushNamedAndRemoveUntil(
+                context, '/login', (route) => false);
+          },
+          child: const Text('Yes'),
+        ),
+      ],
     );
   }
 }

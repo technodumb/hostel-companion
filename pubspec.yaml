@@ -44,6 +44,7 @@ dependencies:
   syncfusion_flutter_datepicker: ^20.4.52
   tuple: ^2.0.1
   barcode_widget: ^2.0.3
+  flutter_downloader: ^1.10.2
 
 dev_dependencies:
   flutter_test:

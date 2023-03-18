@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:hostel_companion/controllers/firebase/version_data.dart';
 
 class LoadScreen extends StatefulWidget {
   @override
@@ -9,6 +11,7 @@ class LoadScreen extends StatefulWidget {
 
 class _LoadScreenState extends State<LoadScreen> {
   bool isSignedIn = false;
+  VersionData versionData = VersionData();
 
   Future<bool> checkInternetConnection() async {
     print("checkInternetConnection");
@@ -31,6 +34,13 @@ class _LoadScreenState extends State<LoadScreen> {
     bool isConnected = await checkInternetConnection();
     print("checkInternetConnectionAndNavigate");
     if (isConnected) {
+      print("checkInternetConnectionAndNavigate");
+      bool isLatest = await versionData.isLatest();
+      if (!isLatest) {
+        String latestUpdate = await versionData.getLatestUpdate();
+        // open the latestUpdate link in webview
+        _updateDialog(latestUpdate);
+      }
       if (isSignedIn) {
         Navigator.pushNamed(context, '/home');
       } else {
@@ -39,6 +49,35 @@ class _LoadScreenState extends State<LoadScreen> {
     } else {
       _retryDialog();
     }
+  }
+
+  void _updateDialog(String link) async {
+    print("updateDialog");
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Update available"),
+            content: Text("Please update the app to continue."),
+            actions: <Widget>[
+              TextButton(
+                child: Text("UPDATE"),
+                onPressed: () async {
+                  final downloadTask = await FlutterDownloader.enqueue(
+                    url: link,
+                    savedDir: '/storage/emulated/0/Download',
+                    showNotification: true,
+                    openFileFromNotification: true,
+                  );
+
+                  // Navigator.of(context).pop();
+                  // open the latestUpdate link in webview
+                },
+              ),
+            ],
+          );
+        });
   }
 
   void _retryDialog() async {

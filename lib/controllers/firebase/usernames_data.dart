@@ -12,6 +12,9 @@ class UsernameData {
       if (statusList != {}) {
         if (statusList['resetted']!.contains(username)) {
           print('resetted');
+          if (statusList['admin']!.contains(username)) {
+            return 'admin';
+          }
           return 'resetted';
         } else if (statusList['withmail']!.contains(username)) {
           print('withmail');
