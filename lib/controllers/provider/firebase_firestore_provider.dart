@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hostel_companion/controllers/firebase/admin_data.dart';
 import 'package:hostel_companion/controllers/firebase/auth.dart';
 import 'package:hostel_companion/controllers/firebase/user_data.dart';
 import 'package:hostel_companion/controllers/firebase/usernames_data.dart';
 import 'package:hostel_companion/controllers/provider/food_data.dart';
+import 'package:hostel_companion/controllers/provider/toggle_controller.dart';
 import 'package:hostel_companion/model/user_model.dart';
 import 'package:tuple/tuple.dart';
 
@@ -19,8 +21,9 @@ class FirebaseFirestoreProvider extends ChangeNotifier {
   String _email = '';
   String _currentUsername = '';
   List<DateTime> _dateRange = [];
-  bool isAdmin = false;
+  bool _isAdmin = false;
 
+  bool get isAdmin => _isAdmin;
   User? get currentUser => _currentUser;
   String get errorcode => _errorcode;
   String get currentUsername => _currentUsername;
@@ -41,7 +44,7 @@ class FirebaseFirestoreProvider extends ChangeNotifier {
       _errorcode = userAndError.item2;
       if (_errorcode == '' && _currentUser != null) {
         if (status == 'admin') {
-          isAdmin = true;
+          _isAdmin = true;
           await getCurrentUserData();
           print("usermodel-date: ${_userModel.name}");
         } else if (status == 'resetted') {
@@ -99,6 +102,7 @@ class FirebaseFirestoreProvider extends ChangeNotifier {
     _email = '';
     _currentUsername = '';
     _userModel = UserModel.empty();
+    FlutterAuth.removeFromSecureStorage();
     notifyListeners();
   }
 
@@ -120,5 +124,21 @@ class FirebaseFirestoreProvider extends ChangeNotifier {
     _userModel.noFoodDates = _userModel.noFoodDates.toSet().toList();
     print(_userModel.noFoodDates);
     notifyListeners();
+  }
+
+  void refreshFoodDates() {
+    userModel.noFoodDates = userModel.noFoodDates
+        .where((date) => date.isAfter(OnlyDate.now()))
+        .toList();
+  }
+
+  void initialToggle(ToggleController toggleData, FoodData foodData) {
+    if (userModel.noFoodDates.contains(foodData.date)) {
+      toggleData.toggleIsFood(value: false);
+      foodData.toggleIsFood(value: false);
+    } else {
+      toggleData.toggleIsFood(value: true);
+      foodData.toggleIsFood(value: true);
+    }
   }
 }

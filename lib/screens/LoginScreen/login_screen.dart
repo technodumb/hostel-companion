@@ -1,10 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hostel_companion/controllers/firebase/auth.dart';
 import 'package:hostel_companion/controllers/provider/firebase_firestore_provider.dart';
 import 'package:hostel_companion/controllers/provider/food_data.dart';
 import 'package:hostel_companion/controllers/provider/toggle_controller.dart';
 import 'package:hostel_companion/global.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
   final loginFormKey = GlobalKey<FormState>();
@@ -171,22 +174,13 @@ class LoginScreen extends StatelessWidget {
                             firebaseFirestoreProvider.currentUser;
                         print(errorcode);
                         if (errorcode == '' && currentUser != null) {
-                          List<DateTime> noFoodDates =
-                              firebaseFirestoreProvider.userModel.noFoodDates;
-
-                          noFoodDates = noFoodDates.where((date) {
-                            return date.isAfter(DateTime.now());
-                          }).toList();
-                          firebaseFirestoreProvider.userModel.noFoodDates =
-                              noFoodDates;
-                          print(noFoodDates);
-                          if (noFoodDates.contains(foodData.date)) {
-                            toggleData.toggleIsFood(value: false);
-                            foodData.toggleIsFood(value: false);
-                          } else {
-                            toggleData.toggleIsFood(value: true);
-                            foodData.toggleIsFood(value: true);
-                          }
+                          // print(
+                          //     'Signed in: ${await storage.read(key: 'isSignedIn')}');
+                          await FlutterAuth.addToSecureStorage(
+                              idController.text, passwordController.text);
+                          firebaseFirestoreProvider.refreshFoodDates();
+                          firebaseFirestoreProvider.initialToggle(
+                              toggleData, foodData);
                           Navigator.pushNamedAndRemoveUntil(
                               context, '/home', (route) => false);
                         } else if (errorcode == 'not-resetted') {

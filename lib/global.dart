@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 Map<String, String> errorMessages = {
   'invalid-email': 'Enter a valid College Email ID',
@@ -34,3 +36,11 @@ Map<String, String> hostelName = {
   'HS1': 'Haile Selassie Hostel - I',
   'HS2': 'Haile Selassie Hostel - II',
 };
+
+AndroidOptions _getAndroidOptions() => const AndroidOptions(
+      encryptedSharedPreferences: true,
+    );
+
+class TestClass {
+  static void callback(String id, DownloadTaskStatus status, int progress) {}
+}

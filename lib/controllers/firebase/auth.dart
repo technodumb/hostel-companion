@@ -1,5 +1,6 @@
 // firebase authentication
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:tuple/tuple.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -70,5 +71,22 @@ class FlutterAuth {
 
   Future<String?> getUser() async {
     return _auth.currentUser?.email;
+  }
+
+  static Future<void> addToSecureStorage(
+      String username, String password) async {
+    const storage = FlutterSecureStorage(
+        aOptions: AndroidOptions(encryptedSharedPreferences: true));
+    await storage.write(key: 'username', value: username);
+    await storage.write(key: 'password', value: password);
+    await storage.write(key: 'isSignedIn', value: 'true');
+  }
+
+  static void removeFromSecureStorage() {
+    const storage = FlutterSecureStorage(
+        aOptions: AndroidOptions(encryptedSharedPreferences: true));
+    storage.delete(key: 'username');
+    storage.delete(key: 'password');
+    storage.write(key: 'isSignedIn', value: 'false');
   }
 }

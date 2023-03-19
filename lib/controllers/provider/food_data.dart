@@ -43,4 +43,8 @@ class OnlyDate extends DateTime {
   factory OnlyDate.fromDate(DateTime datetime) {
     return OnlyDate(datetime.year, datetime.month, datetime.day);
   }
+
+  factory OnlyDate.now() {
+    return OnlyDate.fromDate(DateTime.now());
+  }
 }

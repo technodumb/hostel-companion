@@ -1,5 +1,3 @@
-import 'dart:js';
-
 import 'package:hostel_companion/screens/LoadScreen/load_screen.dart';
 import 'screens/AdminScreen/admin_screen.dart';
 import 'screens/HomeScreen/home_screen.dart';

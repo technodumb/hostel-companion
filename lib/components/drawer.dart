@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hostel_companion/components/min_text_button.dart';
+import 'package:hostel_companion/controllers/firebase/admin_data.dart';
 import 'package:hostel_companion/controllers/provider/firebase_firestore_provider.dart';
+import 'package:hostel_companion/controllers/provider/toggle_controller.dart';
 import 'package:hostel_companion/global.dart';
 import 'package:provider/provider.dart';
 
@@ -115,12 +117,10 @@ class CustomDrawer extends StatelessWidget {
             DrawerButtons(
               text: 'Post Complaints',
               icon: Icons.note_add,
-              onPressed: () => PostComplaintDialog(),
+              onPressed: () => showDialog(
+                  context: context,
+                  builder: (context) => PostComplaintDialog()),
             ),
-            DrawerButtons(
-                text: 'Check for updates',
-                icon: Icons.update,
-                onPressed: () => CheckForUpdatesDialog()),
             DrawerButtons(
                 text: 'Change Password',
                 icon: Icons.lock_reset,
@@ -190,53 +190,157 @@ class DrawerButtons extends StatelessWidget {
 }
 
 class PostComplaintDialog extends StatelessWidget {
+  final TextEditingController titleController = TextEditingController();
   final TextEditingController complaintController = TextEditingController();
-  PostComplaintDialog({super.key});
+  final String username;
+  PostComplaintDialog({super.key, this.username = 'Anonymous'});
 
   @override
   Widget build(BuildContext context) {
-    return SimpleDialog(
-      title: const Text('Post Complaint'),
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(15),
+    AdminData adminData = AdminData();
+    ToggleController toggleController = Provider.of<ToggleController>(context);
+
+    double width = MediaQuery.of(context).size.width;
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Center(
+        child: Container(
+          // alignment: Alignment.center,
+          // width: 300,
+          width: width * 0.8,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          padding: const EdgeInsets.all(20),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text('Post Complaints',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 15),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text('Title: '),
+                  Expanded(
+                    child: TextField(
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        border: OutlineInputBorder(),
+                        alignLabelWithHint: true,
+                      ),
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 17,
+                      ),
+                      textAlign: TextAlign.start,
+                      textAlignVertical: TextAlignVertical.top,
+                      controller: titleController,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
               TextField(
                 decoration: const InputDecoration(
-                  labelText: 'Complaint',
+                  hintText: 'Write your complaint here',
+                  contentPadding: EdgeInsets.all(10),
+                  isDense: true,
                   border: OutlineInputBorder(),
+                  alignLabelWithHint: true,
                 ),
-                maxLines: 5,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 17,
+                ),
+                textAlign: TextAlign.start,
+                textAlignVertical: TextAlignVertical.top,
+                maxLines: null,
                 controller: complaintController,
               ),
-              const SizedBox(height: 20),
-              MinTextButton(
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (context) => const AlertDialog(
-                            title: Text('Complaint Posted'),
-                            content: Text(
-                                'Your complaint has been posted successfully.'),
-                          ));
+              GestureDetector(
+                onTap: () {
+                  toggleController.toggleIsAnonymous();
                 },
-                child: const Text('Post'),
+                child: Row(
+                  children: [
+                    // Checkbox for anonymous
+                    Checkbox(
+                      value: toggleController.isAnonymous,
+                      onChanged: (value) {
+                        toggleController.toggleIsAnonymous();
+                      },
+                    ),
+                    const Text('Post Anonymously'),
+                  ],
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      if (titleController.text.isNotEmpty &&
+                          complaintController.text.isNotEmpty) {
+                        if (DateTime.now().difference(
+                                toggleController.lastComplaintDate) >
+                            const Duration(minutes: 5)) {
+                          adminData.postComplaint(
+                            title: titleController.text,
+                            complaint: complaintController.text,
+                            username: toggleController.isAnonymous
+                                ? 'Anonymous'
+                                : username,
+                          );
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Complaint posted successfully'),
+                            ),
+                          );
+                          toggleController.setLastComplaintDate();
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'Please wait 5 minutes before posting another complaint'),
+                            ),
+                          );
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please fill all the fields'),
+                          ),
+                        );
+                      }
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                    ),
+                    child: const Text('Post',
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                ],
               ),
             ],
           ),
         ),
-      ],
+      ),
     );
-  }
-}
-
-class CheckForUpdatesDialog extends StatelessWidget {
-  const CheckForUpdatesDialog({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
   }
 }
 
