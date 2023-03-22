@@ -47,6 +47,7 @@ dependencies:
   flutter_downloader: ^1.10.2
   flutter_secure_storage: ^8.0.0
   permission_handler: ^10.2.0
+  mat_month_picker_dialog: ^1.1.1
 
 dev_dependencies:
   flutter_test:

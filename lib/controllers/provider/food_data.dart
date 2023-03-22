@@ -40,6 +40,10 @@ class OnlyDate extends DateTime {
     return OnlyDate(now.year + 1, now.month, now.day);
   }
 
+  static int lastYear() {
+    return DateTime.now().year - 1;
+  }
+
   factory OnlyDate.fromDate(DateTime datetime) {
     return OnlyDate(datetime.year, datetime.month, datetime.day);
   }

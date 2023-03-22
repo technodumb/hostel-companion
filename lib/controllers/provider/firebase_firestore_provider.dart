@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hostel_companion/controllers/firebase/admin_data.dart';
 import 'package:hostel_companion/controllers/firebase/auth.dart';
 import 'package:hostel_companion/controllers/firebase/user_data.dart';
@@ -133,6 +132,9 @@ class FirebaseFirestoreProvider extends ChangeNotifier {
   }
 
   void initialToggle(ToggleController toggleData, FoodData foodData) {
+    foodData.date = DateTime.now().hour < 21
+        ? OnlyDate.tomorrow()
+        : OnlyDate.dayAfterTomorrow();
     if (userModel.noFoodDates.contains(foodData.date)) {
       toggleData.toggleIsFood(value: false);
       foodData.toggleIsFood(value: false);

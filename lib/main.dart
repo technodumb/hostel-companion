@@ -4,6 +4,7 @@ import 'package:hostel_companion/controllers/provider/toggle_controller.dart';
 import 'package:hostel_companion/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'controllers/provider/admin_provider.dart';
 import 'controllers/provider/firebase_firestore_provider.dart';
 import 'controllers/provider/food_data.dart';
 import 'controllers/provider/range_controller.dart';
@@ -35,14 +36,14 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<ToggleController>(
             create: (_) => ToggleController()),
         ChangeNotifierProvider<RangeController>(
-            create: (_) => RangeController())
+            create: (_) => RangeController()),
+        ChangeNotifierProvider<AdminProvider>(create: (_) => AdminProvider()),
       ],
       child: MaterialApp(
         title: 'Hostel Companion',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        // home: const HomeScreen(),
         initialRoute: '/load',
         routes: routes,
         debugShowCheckedModeBanner: false,

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hostel_companion/components/min_text_button.dart';
 import 'package:hostel_companion/controllers/firebase/admin_data.dart';
+import 'package:hostel_companion/controllers/firebase/user_data.dart';
 import 'package:hostel_companion/controllers/provider/firebase_firestore_provider.dart';
 import 'package:hostel_companion/controllers/provider/toggle_controller.dart';
 import 'package:hostel_companion/global.dart';
+import 'package:hostel_companion/model/user_model.dart';
 import 'package:provider/provider.dart';
 
 class CustomDrawer extends StatelessWidget {
@@ -119,7 +121,9 @@ class CustomDrawer extends StatelessWidget {
               icon: Icons.note_add,
               onPressed: () => showDialog(
                   context: context,
-                  builder: (context) => PostComplaintDialog()),
+                  builder: (context) => PostComplaintDialog(
+                        userModel: firestoreProvider.userModel,
+                      )),
             ),
             DrawerButtons(
                 text: 'Change Password',
@@ -132,15 +136,16 @@ class CustomDrawer extends StatelessWidget {
                           email: firestoreProvider.userModel.email,
                         ))),
             DrawerButtons(
-                text: 'Logout',
-                icon: Icons.logout,
-                logout: true,
-                onPressed: () => showDialog(
-                      context: context,
-                      builder: (context) => LogoutDialog(
-                        signOut: firestoreProvider.signOut,
-                      ),
-                    )),
+              text: 'Logout',
+              icon: Icons.logout,
+              logout: true,
+              onPressed: () => showDialog(
+                context: context,
+                builder: (context) => LogoutDialog(
+                  signOut: firestoreProvider.signOut,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -192,8 +197,8 @@ class DrawerButtons extends StatelessWidget {
 class PostComplaintDialog extends StatelessWidget {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController complaintController = TextEditingController();
-  final String username;
-  PostComplaintDialog({super.key, this.username = 'Anonymous'});
+  final UserModel userModel;
+  PostComplaintDialog({super.key, required this.userModel});
 
   @override
   Widget build(BuildContext context) {
@@ -300,9 +305,9 @@ class PostComplaintDialog extends StatelessWidget {
                           adminData.postComplaint(
                             title: titleController.text,
                             complaint: complaintController.text,
-                            username: toggleController.isAnonymous
+                            userdata: toggleController.isAnonymous
                                 ? 'Anonymous'
-                                : username,
+                                : "${userModel.name}?${userModel.hostel}?${userModel.roomNo}",
                           );
                           Navigator.of(context).pop();
                           Navigator.of(context).pop();

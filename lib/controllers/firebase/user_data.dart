@@ -17,42 +17,47 @@ class UserData {
 
   Future<void> putUserData(UserModel user) async {
     try {
-      db.collection('users').doc(user.id).update(
+      db.collection('users').doc(user.id).set(
         {
-          'name': user.name,
-          'email': user.email,
-          'id': user.id,
           'noFoodDates': user.noFoodDates,
         },
+        SetOptions(merge: true),
       );
     } catch (e) {
       print(e);
     }
   }
 
-  Future<Map<String, dynamic>?> getMailFromID(String id) async {
+  Future<void> uploadUserData(List<UserModel> users) async {
+    for (UserModel user in users) {
+      try {
+        db.collection('users').doc(user.id).set(
+          {
+            'hostel': user.hostel,
+            'roomNo': user.roomNo,
+            'name': user.name,
+            'email': user.email,
+            'id': user.id,
+            'noFoodDates': user.noFoodDates,
+          },
+          SetOptions(merge: true),
+        );
+      } catch (e) {
+        print(e);
+      }
+    }
+  }
+
+  Future<void> uploadUsernameData(List<String> usernames) async {
     try {
-      await db.collection('user_mails').doc(id).get().then((value) {
-        return value.data();
-      });
+      db.collection('usernames').doc('lists').set(
+        {
+          'all': usernames,
+        },
+        SetOptions(merge: true),
+      );
     } catch (e) {
       print(e);
     }
-    return null;
   }
-
-  // Future<void> putMailToID(String id, String mail) async {
-  //   try {
-  //     await db.collection('usernames').doc(id).set({
-  //       'email': mail,
-  //     });
-  //     await db.collection('users').doc(id).update(
-  //       {
-  //         'email': mail,
-  //       },
-  //     );
-  //   } catch (e) {
-  //     print(e);
-  //   }
-  // }
 }
