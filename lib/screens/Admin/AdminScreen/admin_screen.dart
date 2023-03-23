@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:hostel_companion/components/min_text_button.dart';
 import 'package:hostel_companion/controllers/provider/admin_provider.dart';
@@ -5,6 +8,9 @@ import 'package:hostel_companion/controllers/provider/firebase_firestore_provide
 import 'package:hostel_companion/controllers/provider/food_data.dart';
 import 'package:intl/intl.dart';
 import 'package:mat_month_picker_dialog/mat_month_picker_dialog.dart';
+
+import 'package:open_filex/open_filex.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class AdminScreen extends StatelessWidget {
@@ -15,9 +21,14 @@ class AdminScreen extends StatelessWidget {
     FirebaseFirestoreProvider firebaseFirestoreProvider =
         Provider.of<FirebaseFirestoreProvider>(context);
     AdminProvider adminProvider = Provider.of<AdminProvider>(context);
-    List allStudents = firebaseFirestoreProvider.usernameData.statusList['all'];
-
+    List allStudentsDynamic =
+        firebaseFirestoreProvider.usernameData.statusList['all'];
+    List<String> allStudents = [];
+    for (var i in allStudentsDynamic) {
+      allStudents.add(i.toString());
+    }
     print(allStudents.length);
+    // print(dailyNoFoodList);
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
@@ -25,7 +36,7 @@ class AdminScreen extends StatelessWidget {
         child: Container(
           height: double.infinity,
           width: double.infinity,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -42,8 +53,8 @@ class AdminScreen extends StatelessWidget {
                   Container(
                     // height: 200,
                     width: double.infinity,
-                    margin: EdgeInsets.all(10),
-                    padding: EdgeInsets.all(10),
+                    margin: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.white),
                       borderRadius: BorderRadius.circular(20),
@@ -51,25 +62,25 @@ class AdminScreen extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Text("Almighty Admin, ",
+                        const Text("Almighty Admin, ",
                             style:
                                 TextStyle(color: Colors.white, fontSize: 30)),
-                        SizedBox(
+                        const SizedBox(
                           height: 15,
                         ),
                         Text("Sir ${firebaseFirestoreProvider.userModel.name}",
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 20)),
-                        SizedBox(height: 15),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 20)),
+                        const SizedBox(height: 15),
                         MinTextButton(
                           onPressed: () => Navigator.pop(context),
                           child: Container(
-                            padding: EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               border: Border.all(color: Colors.white),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Text(
+                            child: const Text(
                               'Go Back to User Mode',
                               style: TextStyle(
                                 color: Colors.white,
@@ -83,8 +94,9 @@ class AdminScreen extends StatelessWidget {
                   ),
                   Container(
                     // height: 200,
-                    margin: EdgeInsets.all(10),
-                    padding: EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+                    margin: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 15),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.white),
                       borderRadius: BorderRadius.circular(20),
@@ -92,14 +104,14 @@ class AdminScreen extends StatelessWidget {
                     child: Center(
                       child: Column(
                         children: [
-                          Text(
+                          const Text(
                             'Daily Food Stats',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 20,
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 20,
                           ),
                           Row(
@@ -116,11 +128,13 @@ class AdminScreen extends StatelessWidget {
                                             lastDate: DateTime(2025),
                                           ) ??
                                           OnlyDate.now();
+                                  await adminProvider.getDailyNoFoodList();
                                 },
                                 child: Container(
                                   height: 40,
                                   width: width * 0.65,
-                                  padding: EdgeInsets.symmetric(horizontal: 20),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(20),
@@ -132,9 +146,9 @@ class AdminScreen extends StatelessWidget {
                                       Text(
                                         DateFormat('dd MMM yyyy, EEE')
                                             .format(adminProvider.dailyDate),
-                                        style: TextStyle(fontSize: 20),
+                                        style: const TextStyle(fontSize: 20),
                                       ),
-                                      Icon(
+                                      const Icon(
                                         Icons.edit,
                                         color: Colors.black,
                                       )
@@ -154,10 +168,10 @@ class AdminScreen extends StatelessWidget {
                                   width: width * 0.2,
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
-                                    color: Color(0xFF00372A),
+                                    color: const Color(0xFF00372A),
                                     borderRadius: BorderRadius.circular(20),
                                   ),
-                                  child: Text(
+                                  child: const Text(
                                     'Today',
                                     style: TextStyle(
                                       color: Colors.white,
@@ -169,7 +183,7 @@ class AdminScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 20,
                           ),
                           Row(
@@ -177,32 +191,64 @@ class AdminScreen extends StatelessWidget {
                             children: [
                               AdminCountDownloadButton(
                                 title: 'Total:',
-                                count: '${allStudents.length}',
+                                studList: allStudents,
                                 widthRatio: 0.18,
-                                onPressed: () {},
+                                onPressed: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) => ShowNameList(
+                                          title: 'Total List',
+                                          studentList: allStudents
+                                              .map((e) =>
+                                                  e +
+                                                  ' -> ${adminProvider.dailyNoFoodList.contains(e) ? 'No Food' : 'Food'}')
+                                              .toList()));
+                                },
                                 colors: [
-                                  Color(0xFF8DB046),
-                                  Color(0xFF63851F),
+                                  const Color(0xFF8DB046),
+                                  const Color(0xFF63851F),
                                 ],
                               ),
                               AdminCountDownloadButton(
                                 title: 'Food:',
-                                count: '400',
-                                onPressed: () {},
+                                studList: allStudents
+                                    .where((element) => !adminProvider
+                                        .dailyNoFoodList
+                                        .contains(element))
+                                    .toList(),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => ShowNameList(
+                                        title: 'Food List',
+                                        studentList: allStudents
+                                            .where((element) => !adminProvider
+                                                .dailyNoFoodList
+                                                .contains(element))
+                                            .toList()),
+                                  );
+                                },
                                 colors: [
-                                  Color(0xFF806491),
-                                  Color(0xFF713198),
+                                  const Color(0xFF806491),
+                                  const Color(0xFF713198),
                                 ],
                               ),
                               AdminCountDownloadButton(
                                 title: 'No Food:',
-                                count: '40',
+                                studList: adminProvider.dailyNoFoodList,
                                 onPressed: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) => ShowNameList(
+                                            title: 'No Food',
+                                            studentList:
+                                                adminProvider.dailyNoFoodList,
+                                          ));
                                   print('buttton pressed');
                                 },
                                 colors: [
-                                  Color(0xFFFE3533),
-                                  Color(0xFF7E1717),
+                                  const Color(0xFFFE3533),
+                                  const Color(0xFF7E1717),
                                 ],
                               ),
                             ],
@@ -212,22 +258,23 @@ class AdminScreen extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    margin: EdgeInsets.all(10),
+                    margin: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.white),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    padding: EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 15),
                     child: Column(
                       children: [
-                        Text(
+                        const Text(
                           'Monthly Food Stats',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 20,
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 20,
                         ),
                         Row(
@@ -250,7 +297,7 @@ class AdminScreen extends StatelessWidget {
                               child: Container(
                                 height: 40,
                                 width: width * 0.6,
-                                padding: EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                   horizontal: 20,
                                 ),
                                 // alignment: Alignment.center,
@@ -265,13 +312,13 @@ class AdminScreen extends StatelessWidget {
                                     Text(
                                       DateFormat('MMMM yyyy')
                                           .format(adminProvider.monthlyDate),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: Colors.black,
                                         fontSize: 20,
                                         fontWeight: FontWeight.w400,
                                       ),
                                     ),
-                                    Icon(
+                                    const Icon(
                                       Icons.edit,
                                       color: Colors.black,
                                     ),
@@ -291,10 +338,10 @@ class AdminScreen extends StatelessWidget {
                                 width: width * 0.2,
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                  color: Color(0xFF00372A),
+                                  color: const Color(0xFF00372A),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: Text(
+                                child: const Text(
                                   'Reset',
                                   style: TextStyle(
                                     color: Colors.white,
@@ -304,7 +351,7 @@ class AdminScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            Icon(
+                            const Icon(
                               Icons.download,
                               color: Colors.white,
                             ),
@@ -329,8 +376,8 @@ class AdminScreen extends StatelessWidget {
                           border: Border.all(color: Colors.white),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        padding:
-                            EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 20, horizontal: 15),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: const [
@@ -362,20 +409,22 @@ class AdminScreen extends StatelessWidget {
 class AdminCountDownloadButton extends StatelessWidget {
   final double widthRatio;
   final String title;
-  final String count;
+  final List<String> studList;
   final Function() onPressed;
   final List<Color> colors;
-  AdminCountDownloadButton({
+  const AdminCountDownloadButton({
     super.key,
     this.widthRatio = 0.33,
     required this.title,
-    required this.count,
+    required this.studList,
     required this.onPressed,
     required this.colors,
   });
 
   @override
   Widget build(BuildContext context) {
+    List<String> noFoodList = context.read<AdminProvider>().dailyNoFoodList;
+    DateTime currentDate = context.read<AdminProvider>().dailyDate;
     final width = MediaQuery.of(context).size.width;
     return MinTextButton(
       shape: RoundedRectangleBorder(
@@ -399,23 +448,50 @@ class AdminCountDownloadButton extends StatelessWidget {
           children: [
             Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
               ),
             ),
             Text(
-              count,
-              style: TextStyle(
+              studList.length.toString(),
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 25,
               ),
             ),
             MinTextButton(
-                onPressed: () {
-                  print('download clicked');
+                onPressed: () async {
+                  String location = '/storage/emulated/0/Download/Hostel';
+                  // Directory directory = Directory(location);
+
+                  // final String path = '$directory/Download';
+                  Directory(location).createSync(recursive: true);
+                  final String fileName = '$currentDate $title.csv';
+                  // csv generate from the list
+                  final String csv = const ListToCsvConverter().convert([
+                        [
+                          'Sl No',
+                          'ID',
+                          'Food Stat',
+                        ],
+                      ] +
+                      List.generate(
+                          studList.length,
+                          (index) => [
+                                '${index + 1}',
+                                studList[index],
+                                (!noFoodList.contains(studList[index]))
+                                    .toString(),
+                              ]));
+                  // write the csv file
+                  final File file = File('$location/$fileName');
+                  await file.writeAsString(csv);
+                  // print('download clicked');
+                  // open file
+                  OpenFilex.open('$location/$fileName');
                 },
-                child: Icon(
+                child: const Icon(
                   Icons.download,
                   color: Colors.white,
                   size: 30,
@@ -427,4 +503,176 @@ class AdminCountDownloadButton extends StatelessWidget {
   }
 
   void adminDownload() {}
+}
+
+class ShowNameList extends StatelessWidget {
+  final String title;
+  final List<String> studentList;
+  ShowNameList({super.key, required this.title, required this.studentList});
+
+  @override
+  Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: Container(
+        // height: 200,
+        // height: 500,
+        // width: 100,
+        // margin: EdgeInsets.symmetric(vertical: 100),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(colors: [
+            Color(0xFF806491),
+            Color(0xFF9258B6),
+          ]),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(20),
+              width: width * 0.8,
+              height: width * 1,
+              decoration: BoxDecoration(
+                  color: const Color(0x7F000000),
+                  borderRadius: BorderRadius.circular(20)),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: List.generate(
+                      studentList.length,
+                      (index) => Text(
+                            '${index + 1}. ${studentList[index]}',
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 18),
+                          )),
+                  // children: [
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  //   Text(
+                  //     '1.',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  // ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

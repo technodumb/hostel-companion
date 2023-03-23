@@ -10,6 +10,8 @@ class AdminProvider extends ChangeNotifier {
   DateTime _monthlyDate =
       DateTime.now().hour < 21 ? OnlyDate.now() : OnlyDate.tomorrow();
 
+  List<String> dailyNoFoodList = [];
+
   DateTime get dailyDate => _dailyDate;
   DateTime get monthlyDate => _monthlyDate;
 
@@ -23,9 +25,15 @@ class AdminProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> getDailyNoFoodList() async {
+    dailyNoFoodList = await adminData.getDateInfo(_dailyDate);
+    notifyListeners();
+  }
+
   void resetDailyDate() {
     _dailyDate =
         DateTime.now().hour < 21 ? OnlyDate.now() : OnlyDate.tomorrow();
+    getDailyNoFoodList();
     notifyListeners();
   }
 

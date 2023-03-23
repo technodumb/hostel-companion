@@ -1,5 +1,5 @@
 Future<void> abc() async {
-  await Future.delayed(Duration(seconds: 1), () => print('abc'));
+  await Future.delayed(const Duration(seconds: 1), () => print('abc'));
   // print('abc');
   // print('abc');
   // print(() => 'abc');

@@ -39,7 +39,7 @@ class LoginScreen extends StatelessWidget {
                 Navigator.pushNamedAndRemoveUntil(
                     context, '/login', (route) => false);
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         ),
@@ -95,7 +95,7 @@ class LoginScreen extends StatelessWidget {
                         controller: idController,
                         decoration: InputDecoration(
                           hintText: 'College ID (eg. B21CS201)',
-                          hintStyle: TextStyle(
+                          hintStyle: const TextStyle(
                             color: Color(0x3D000000),
                           ),
                           border: OutlineInputBorder(

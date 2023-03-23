@@ -6,10 +6,10 @@ import 'screens/LoginScreen/first_time_login.dart';
 import 'screens/LoginScreen/login_screen.dart';
 
 var routes = {
-  '/load': (context) => LoadScreen(),
+  '/load': (context) => const LoadScreen(),
   '/home': (context) => HomeScreen(),
   '/login': (context) => LoginScreen(),
   '/firstlogin': (context) => FirstTimeLoginScreen(),
-  '/admin': (context) => AdminScreen(),
-  '/admin/complaints': (context) => ComplaintScreen(),
+  '/admin': (context) => const AdminScreen(),
+  '/admin/complaints': (context) => const ComplaintScreen(),
 };

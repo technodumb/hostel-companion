@@ -37,10 +37,6 @@ Map<String, String> hostelName = {
   'HS2': 'Haile Selassie Hostel - II',
 };
 
-AndroidOptions _getAndroidOptions() => const AndroidOptions(
-      encryptedSharedPreferences: true,
-    );
-
 class TestClass {
   static void callback(String id, DownloadTaskStatus status, int progress) {}
 }

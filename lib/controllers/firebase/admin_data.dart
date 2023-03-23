@@ -45,6 +45,7 @@ class AdminData {
   final db = FirebaseFirestore.instance;
   List<int> complaintIDs = [];
   Map<int, ComplaintData> complaints = {};
+  List<String> dailyNoFoodList = [];
 
   Future<void> addDateToAdmin(UserModel user, List<DateTime> dates) async {
     for (DateTime date in dates) {
@@ -56,12 +57,34 @@ class AdminData {
     }
   }
 
-  void postComplaint(
+  Future<List<String>> getDateInfo(DateTime date) async {
+    String dateString =
+        "${date.year % 100}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}";
+
+    try {
+      return await db.collection('admin').doc(dateString).get().then((data) {
+        print(data.data());
+        List<String> noFoodList = [];
+        if (data.data() != null) {
+          for (String key in data.data()!.keys) {
+            if (data.data()![key] == true) noFoodList.add(key);
+            print(noFoodList);
+          }
+        }
+        return noFoodList;
+      });
+    } catch (e) {
+      print("getDateInfoError: $e");
+      return [];
+    }
+  }
+
+  Future<void> postComplaint(
       {required String title,
       required String complaint,
-      required String userdata}) {
+      required String userdata}) async {
     Random random = Random();
-    db.collection('admin').doc('complaints').set({
+    await db.collection('admin').doc('complaints').set({
       (DateTime.now().millisecondsSinceEpoch * 100 + random.nextInt(100))
           .toString(): {
         'title': title,

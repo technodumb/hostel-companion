@@ -1,11 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hostel_companion/components/min_text_button.dart';
-import 'package:hostel_companion/controllers/firebase/user_data.dart';
 import 'package:hostel_companion/controllers/provider/firebase_firestore_provider.dart';
 import 'package:hostel_companion/controllers/provider/food_data.dart';
 import 'package:hostel_companion/controllers/provider/range_controller.dart';
-import 'package:hostel_companion/screens/LoginScreen/first_time_login.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -368,7 +365,7 @@ class CustomRangeCalendar extends StatelessWidget {
           color: Colors.black,
         ),
       ),
-      calendarStyle: CalendarStyle(
+      calendarStyle: const CalendarStyle(
         rangeHighlightColor: Color(0x7FFF7A00),
       ),
       calendarBuilders: CalendarBuilders(
@@ -378,13 +375,13 @@ class CustomRangeCalendar extends StatelessWidget {
             return Container(
               margin: const EdgeInsets.all(3),
               decoration: BoxDecoration(
-                color: Color(0x7FFF0000),
+                color: const Color(0x7FFF0000),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Center(
                 child: Text(
                   date.day.toString(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                   ),
@@ -400,7 +397,7 @@ class CustomRangeCalendar extends StatelessWidget {
             alignment: Alignment.center,
             margin: const EdgeInsets.all(2),
             decoration: BoxDecoration(
-              color: Color(0xFFFF7A00),
+              color: const Color(0xFFFF7A00),
               borderRadius: BorderRadius.circular(20),
               border: noFoodDates.contains(OnlyDate.fromDate(day))
                   ? Border.all(color: Colors.black, width: 2)
@@ -419,7 +416,7 @@ class CustomRangeCalendar extends StatelessWidget {
           alignment: Alignment.center,
           margin: const EdgeInsets.all(2),
           decoration: BoxDecoration(
-            color: Color(0xFFFF7A00),
+            color: const Color(0xFFFF7A00),
             borderRadius: BorderRadius.circular(20),
             border: noFoodDates.contains(OnlyDate.fromDate(day))
                 ? Border.all(color: Colors.black, width: 2)
@@ -448,7 +445,7 @@ class CustomRangeCalendar extends StatelessWidget {
               child: Center(
                 child: Text(
                   day.day.toString(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.black,
                     fontSize: 16,
                   ),

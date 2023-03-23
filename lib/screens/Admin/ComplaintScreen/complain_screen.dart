@@ -14,7 +14,7 @@ class ComplaintScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [
                 Colors.black,
@@ -27,19 +27,19 @@ class ComplaintScreen extends StatelessWidget {
               AppBar(
                 elevation: 0,
                 backgroundColor: Colors.transparent,
-                title: Text(
+                title: const Text(
                   'Complaints',
                   style: TextStyle(color: Colors.white, fontSize: 20),
                 ),
                 leading: MinTextButton(
-                    child: Icon(
+                    child: const Icon(
                       Icons.arrow_back_ios,
                       color: Colors.white,
                     ),
                     onPressed: () => Navigator.pop(context)),
                 centerTitle: true,
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Expanded(
@@ -58,9 +58,9 @@ class ComplaintScreen extends StatelessWidget {
                       return Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
-                          color: Color(0xE6000853),
+                          color: const Color(0xE6000853),
                         ),
-                        margin: EdgeInsets.all(10),
+                        margin: const EdgeInsets.all(10),
                         // padding: EdgeInsets.all(10),
                         child: Padding(
                           padding: const EdgeInsets.all(10.0),
@@ -71,26 +71,26 @@ class ComplaintScreen extends StatelessWidget {
                               children: [
                                 Text(
                                   complaint.title,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       color: Colors.white, fontSize: 16),
                                 ),
                                 Text(
                                   name,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       color: Colors.orange, fontSize: 14),
                                 ),
                                 if (name != 'Anonymous')
                                   Text(
                                     '${hostelName[hostel]} - $room',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         color: Colors.orange, fontSize: 14),
                                   ),
                               ],
                             ),
                             subtitle: Text(
                               complaint.complaint,
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 14),
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 14),
                             ),
                           ),
                         ),

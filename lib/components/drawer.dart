@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hostel_companion/components/min_text_button.dart';
 import 'package:hostel_companion/controllers/firebase/admin_data.dart';
-import 'package:hostel_companion/controllers/firebase/user_data.dart';
+import 'package:hostel_companion/controllers/provider/admin_provider.dart';
 import 'package:hostel_companion/controllers/provider/firebase_firestore_provider.dart';
 import 'package:hostel_companion/controllers/provider/toggle_controller.dart';
 import 'package:hostel_companion/global.dart';
@@ -15,6 +15,10 @@ class CustomDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     FirebaseFirestoreProvider firestoreProvider =
         Provider.of<FirebaseFirestoreProvider>(context);
+    if (firestoreProvider.isAdmin) {
+      AdminProvider adminProvider = Provider.of<AdminProvider>(context);
+      adminProvider.adminData.getDateInfo(adminProvider.dailyDate);
+    }
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     return SafeArea(
@@ -112,10 +116,12 @@ class CustomDrawer extends StatelessWidget {
             ),
             if (firestoreProvider.isAdmin)
               DrawerButtons(
-                text: 'Admin Panel',
-                icon: Icons.admin_panel_settings,
-                onPressed: () => Navigator.of(context).pushNamed('/admin'),
-              ),
+                  text: 'Admin Panel',
+                  icon: Icons.admin_panel_settings,
+                  onPressed: () {
+                    context.read<AdminProvider>().getDailyNoFoodList();
+                    Navigator.of(context).pushNamed('/admin');
+                  }),
             DrawerButtons(
               text: 'Post Complaints',
               icon: Icons.note_add,
@@ -222,14 +228,14 @@ class PostComplaintDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Post Complaints',
+              const Text('Post Complaints',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
               const SizedBox(height: 15),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text('Title: '),
+                  const Text('Title: '),
                   Expanded(
                     child: TextField(
                       decoration: const InputDecoration(
@@ -239,7 +245,7 @@ class PostComplaintDialog extends StatelessWidget {
                         border: OutlineInputBorder(),
                         alignLabelWithHint: true,
                       ),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.black,
                         fontSize: 17,
                       ),
@@ -259,7 +265,7 @@ class PostComplaintDialog extends StatelessWidget {
                   border: OutlineInputBorder(),
                   alignLabelWithHint: true,
                 ),
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.black,
                   fontSize: 17,
                 ),
@@ -292,7 +298,7 @@ class PostComplaintDialog extends StatelessWidget {
                     onPressed: () => Navigator.of(context).pop(),
                     child: const Text('Cancel'),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 10,
                   ),
                   TextButton(

@@ -8,10 +8,13 @@ import 'package:hostel_companion/controllers/provider/firebase_firestore_provide
 import 'package:hostel_companion/controllers/provider/food_data.dart';
 import 'package:hostel_companion/controllers/provider/toggle_controller.dart';
 import 'package:hostel_companion/global.dart';
+import 'package:ntp/ntp.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class LoadScreen extends StatefulWidget {
+  const LoadScreen({super.key});
+
   @override
   _LoadScreenState createState() => _LoadScreenState();
 }
@@ -26,12 +29,13 @@ class _LoadScreenState extends State<LoadScreen> {
   Future<bool> checkInternetConnection() async {
     print("checkInternetConnection");
     try {
-      final result = await InternetAddress.lookup('google.com')
-          .timeout(Duration(seconds: 5));
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        return true;
-      }
+      // var result = await InternetAddress.lookup('http://172.18.0.1:8090/');
+      return await NTP
+          .getNtpOffset(localTime: DateTime.now().toLocal())
+          .timeout(const Duration(seconds: 5))
+          .then((value) => true);
     } on SocketException catch (_) {
+      print(_);
       return false;
     } on TimeoutException catch (_) {
       return false;
@@ -90,11 +94,11 @@ class _LoadScreenState extends State<LoadScreen> {
         builder: (BuildContext context) {
           FlutterDownloader.registerCallback(TestClass.callback);
           return AlertDialog(
-            title: Text("Update available"),
-            content: Text("Please update the app to continue."),
+            title: const Text("Update available"),
+            content: const Text("Please update the app to continue."),
             actions: <Widget>[
               TextButton(
-                child: Text("UPDATE"),
+                child: const Text("UPDATE"),
                 onPressed: () async {
                   // request storage permission
                   if (Platform.isAndroid) {
@@ -132,12 +136,12 @@ class _LoadScreenState extends State<LoadScreen> {
         barrierDismissible: false,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("No internet connection"),
-            content:
-                Text("Please check your internet connection and try again."),
+            title: const Text("No internet connection"),
+            content: const Text(
+                "Please check your internet connection and try again."),
             actions: <Widget>[
               TextButton(
-                  child: Text("RETRY"),
+                  child: const Text("RETRY"),
                   onPressed: () {
                     Navigator.of(context).pop();
                     _checkInternetConnectionAndNavigate();

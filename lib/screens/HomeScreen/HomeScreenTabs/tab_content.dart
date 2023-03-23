@@ -113,7 +113,7 @@ class DailyTabContent extends StatelessWidget {
               ),
               TextSpan(
                 text: foodData.isFood ? ' Food' : ' No Food',
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w400,
                   fontSize: 24,
@@ -244,13 +244,13 @@ class CalendarDialogForDateSelect extends StatelessWidget {
                     return Container(
                       margin: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
-                        color: Color(0x7FFF0000),
+                        color: const Color(0x7FFF0000),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Center(
                         child: Text(
                           date.day.toString(),
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
                           ),
